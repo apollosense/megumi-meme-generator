@@ -7,7 +7,7 @@
 <script>
 /* (c) apollosense. All rights reserved. Do not copy or redistribute. */
 (function(){
-  // 1) Fixed template typo: changed .com to .io for GitHub Pages
+  // 1) Set your real domain here
   var ALLOWED_HOSTS = ["apollosense.github.io"];
   var h = location.hostname;
   var local = !h || h==="localhost" || h==="127.0.0.1" || location.protocol==="file:";
@@ -29,34 +29,19 @@
 <script>
 (function(){
   if(window.__blocked) return;
-  var h = location.hostname;
-  var local = !h || h==="localhost" || h==="127.0.0.1" || location.protocol==="file:";
-  if(local) return;   // stays off while you test locally
-  function lock(){
-    if(window.__locked) return; window.__locked = true;
-    document.documentElement.innerHTML = '<body style="margin:0;display:grid;place-items:center;height:100vh;background:#04070f;color:#e6efff;font-family:sans-serif;text-align:center;padding:24px">Developer tools detected. Close them and reload the page.</body>';
-  }
-  // block shortcuts: F12, Ctrl/Cmd+Shift+I/J/C/K, Ctrl/Cmd+U, Ctrl/Cmd+S
+  // Safeguards block shortcuts: F12, Ctrl/Cmd+Shift+I/J/C/K, Ctrl/Cmd+U, Ctrl/Cmd+S
   window.addEventListener('keydown', function(e){
     var k = (e.key||'').toLowerCase(), m = e.ctrlKey || e.metaKey;
     if(e.key==='F12' || (m && e.shiftKey && 'ijck'.indexOf(k)>-1) || (m && (k==='u' || k==='s')) || (e.metaKey && e.altKey && 'iuj'.indexOf(k)>-1)){
       e.preventDefault(); e.stopPropagation(); return false;
     }
   }, true);
-  // block right-click menu (still allowed inside text boxes)
+  // Block right-click menu (still allowed inside text boxes)
   window.addEventListener('contextmenu', function(e){
     var n = e.target && e.target.tagName;
     if(n==='TEXTAREA' || n==='INPUT') return;
     e.preventDefault();
   }, true);
-  // detect an open devtools panel (docked panel changes window size; debugger stalls when open)
-  setInterval(function(){
-    var wDiff = window.outerWidth - window.innerWidth > 200;
-    var hDiff = window.outerHeight - window.innerHeight > 260;
-    var t = performance.now();
-    (function(){ debugger; })();
-    if(performance.now() - t > 120 || ((wDiff || hDiff) && window.outerWidth > 900)) lock();
-  }, 1000);
 })();
 </script>
 <style>
