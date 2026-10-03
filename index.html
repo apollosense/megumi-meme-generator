@@ -1,83 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="google-site-verification" content="3nU25JM0FLYyqrYy46lElSpWNbfpL8ybbhmEIe-198w" />
 <meta charset="utf-8">
 <title>Megumi Text Generator</title>
 <meta name="robots" content="noindex,nofollow">
-<script>
-/* (c) apollosense. All rights reserved. Do not copy or redistribute. */
-(function(){
-  // 1) Edit this list: put your real domain(s) here, e.g. ["mysite.com","www.mysite.com"]
-  var ALLOWED_HOSTS = ["www.apollosense.github.io","apollosense.github.io"];
-  var h = location.hostname;
-  var local = !h || h==="localhost" || h==="127.0.0.1" || location.protocol==="file:";
-  var ok = local || ALLOWED_HOSTS.indexOf(h) !== -1;
-  // 2) Block being embedded in someone else's page
-  var framed = false;
-  try { framed = window.top !== window.self; } catch(e){ framed = true; }
-  if(framed && !local){ ok = false; }
-  if(!ok){
-    window.__blocked = true;
-    document.documentElement.innerHTML = '<body style="margin:0;display:grid;place-items:center;height:100vh;background:#04070f;color:#e6efff;font-family:sans-serif;text-align:center;padding:24px">This copy is not authorized. The original is made by apollosense.</body>';
-  }
-})();
-</script>
-
-<!-- Google Analytics (only runs on the authorized live site) -->
-<script>
-(function(){
-  if(window.__blocked) return;
-  var h = location.hostname;
-  var local = !h || h==="localhost" || h==="127.0.0.1" || location.protocol==="file:";
-  if(local) return;
-  var s = document.createElement('script');
-  s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-C0XXD6S2HF';
-  document.head.appendChild(s);
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', 'G-C0XXD6S2HF');
-})();
-</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@700;800;900&display=swap">
-<script>
-(function(){
-  if(window.__blocked) return;
-  var h = location.hostname;
-  var local = !h || h==="localhost" || h==="127.0.0.1" || location.protocol==="file:";
-  if(local) return;   // stays off while you test locally
-  function lock(){
-    if(window.__locked) return; window.__locked = true;
-    document.documentElement.innerHTML = '<body style="margin:0;display:grid;place-items:center;height:100vh;background:#04070f;color:#e6efff;font-family:sans-serif;text-align:center;padding:24px">Developer tools detected. Close them and reload the page.</body>';
-  }
-  // block shortcuts: F12, Ctrl/Cmd+Shift+I/J/C/K, Ctrl/Cmd+U, Ctrl/Cmd+S
-  window.addEventListener('keydown', function(e){
-    var k = (e.key||'').toLowerCase(), m = e.ctrlKey || e.metaKey;
-    if(e.key==='F12' || (m && e.shiftKey && 'ijck'.indexOf(k)>-1) || (m && (k==='u' || k==='s')) || (e.metaKey && e.altKey && 'iuj'.indexOf(k)>-1)){
-      e.preventDefault(); e.stopPropagation(); return false;
-    }
-  }, true);
-  // block right-click menu (still allowed inside text boxes)
-  window.addEventListener('contextmenu', function(e){
-    var n = e.target && e.target.tagName;
-    if(n==='TEXTAREA' || n==='INPUT') return;
-    e.preventDefault();
-  }, true);
-  // detect an open devtools panel (docked panel changes window size; debugger stalls when open)
-  setInterval(function(){
-    var wDiff = window.outerWidth - window.innerWidth > 200;
-    var hDiff = window.outerHeight - window.innerHeight > 260;
-    var t = performance.now();
-    (function(){ debugger; })();
-    if(performance.now() - t > 120 || ((wDiff || hDiff) && window.outerWidth > 900)) lock();
-  }, 1000);
-})();
-</script>
 <style>
 :root{
   box-sizing:border-box;
@@ -236,7 +166,7 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
   </section>
 </main>
 
-<footer class="mark">made by apollosense on every platform!</footer>
+<footer class="mark">made by me on every platform!</footer>
 
 <script>
 (function(){
