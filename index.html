@@ -111,18 +111,40 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
   color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
 .xbtn:hover{border-color:var(--accent)}
 .xbtn svg{width:16px;height:16px;fill:currentColor}
+
+body{--col:24px;position:relative;min-height:250vh;display:flex;flex-direction:column;padding-left:calc(var(--col) * 3)}
+main{width:100%}
+footer.mark{margin-top:auto}
+.side{position:absolute;top:0;bottom:0;left:0;display:flex;overflow:hidden;padding-top:20px;
+  color:var(--accent);font-weight:900;font-size:12px;letter-spacing:.06em;user-select:none;opacity:.8}
+.side div{width:var(--col);overflow:hidden;writing-mode:vertical-rl;white-space:nowrap}
+@media (min-width:1420px){
+  body{--col:34px;padding-left:0}
+  .side{font-size:15px}
+}
+.side a{color:inherit;text-decoration:none}
+.side a:hover{text-decoration:underline}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.rbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;
+  background:#ff4500;color:#fff;font-size:11px;font-weight:900;line-height:1}
 </style>
 </head>
 <body>
+<div class="side" aria-hidden="true"><div></div><div></div><div></div></div>
 <main>
   <header>
     <div class="top">
       <h1>Megumi text generator</h1>
-      <!-- put your real X handle in the link below -->
-      <a class="xbtn" href="https://x.com/apollosenseii" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        Follow on X
-      </a>
+      <div class="links">
+        <a class="xbtn" href="https://x.com/apollosenseii" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Follow on X
+        </a>
+        <a class="xbtn" href="https://www.reddit.com/user/apollosense" target="_blank" rel="noopener noreferrer">
+          <span class="rbadge" aria-hidden="true">r</span>
+          Follow on Reddit
+        </a>
+      </div>
     </div>
     <p>Type your line, drag it into place, save the image. Your images and text are processed in your browser and are only uploaded if you choose Upload to GIPHY. Anonymous visit statistics are collected via Google Analytics.</p>
   </header>
@@ -217,7 +239,7 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
 </main>
 </main>
 
-<footer class="mark">made by apollosense!</footer>
+<footer class="mark">made by apollosense on every platform!</footer>
 
 <script src="app.js"></script>
 </body>
