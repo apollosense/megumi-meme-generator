@@ -147,7 +147,7 @@ footer.mark{margin-top:auto}
 
   <section class="stage" aria-label="Preview">
     <canvas id="cv" width="1024" height="741" role="img" aria-label="Meme preview"></canvas>
-    <p class="hint">Drag the text on the image to reposition it.</p>
+    <p class="hint" id="dragHint">Drag the text on the image to reposition it.</p>
     <div class="actions">
       <button class="primary" id="btnSave">Save PNG</button>
       <button id="btnCopy">Copy image</button>
@@ -196,6 +196,9 @@ footer.mark{margin-top:auto}
 
     <label>Text <small id="txtHint">One line per row. The last line is the big one.</small>
       <textarea id="txt" rows="2">HELL YEAH</textarea>
+    </label>
+    <label id="txt2Wrap" hidden>Second text <small>Goes over the right picture. One line per row.</small>
+      <textarea id="txt2" rows="2"></textarea>
     </label>
     <div class="chips" id="chips">
       <button type="button" data-t="HELL YEAH">Hell yeah</button>

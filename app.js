@@ -26,17 +26,26 @@
     { id:'geto-monkeys',  src:'templ/geto-monkeys.png',  label:'Geto',
       text:{ mode:'plain', grow:'down', x:.7233, y:.3394, size:4.8, lead:1.40, font:'manga',
              c1:'#000000', small:false, upper:true, sample:'READ' } },
-    // caption goes in the white strip on top (0 to ~285px of 1696)
+    // two captions in the white strip on top (0 to 288px of 1696), one over each
+    // picture. left picture is x 84-773, right one is x 773-1470 (image is 1548 wide).
+    // "slots" = more than one text on the same template, each has its own x, y
     { id:'yuji-uncanny',  src:'templ/yuji-uncanny.png',  label:'Yuji',
-      text:{ mode:'plain', grow:'middle', x:.5, y:.082, size:5.2, lead:1.65, font:'Arial',
-             c1:'#000000', small:false, upper:false, sample:'Type your text' } }
+      text:{ mode:'plain', grow:'middle', size:4.2, lead:1.65, font:'Arial',
+             c1:'#000000', small:false, upper:false,
+             slots:[ { x:.2767, y:.085, sample:'Left text' },
+                     { x:.7245, y:.085, sample:'Right text' } ] } }
   ];
+  function slotsOf(tpl){
+    var t = (tpl && tpl.text) || {};
+    return t.slots || [{ x:t.x==null ? .045 : t.x, y:t.y==null ? .9 : t.y, sample:t.sample }];
+  }
+  function copyPos(tpl){ return slotsOf(tpl).map(function(s){ return { x:s.x, y:s.y }; }); }
   var currentTemplate = TEMPLATES[0];
   // -----------------------------------------------------------------------
 
   var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
   var $ = function(id){return document.getElementById(id)};
-  var state = { x:.045, y:.9, bg:null };
+  var state = { pos:[{ x:.045, y:.9 }], boxes:[], bg:null };
   var customFamily = null;
   var status = $('status');
   function say(m){ status.textContent = m; }
@@ -74,8 +83,8 @@
     return document.fonts.load('800 60px ' + v).catch(function(){});
   }
 
-  function lines(){
-    var t = $('txt').value.replace(/\r/g,'');
+  function lines(slot){
+    var t = $(slot ? 'txt2' : 'txt').value.replace(/\r/g,'');
     if($('upper').checked) t = t.toUpperCase();
     var arr = t.split('\n');
     while(arr.length && arr[arr.length-1].trim()==='') arr.pop();
@@ -87,16 +96,22 @@
     var W = tc.width, H = tc.height;
     ctx.clearRect(0,0,W,H);
     if(state.bg) ctx.drawImage(state.bg,0,0,W,H);
-    var arr = lines(); if(!arr.length) return;
+    for(var s=0; s<state.pos.length; s++) drawSlot(ctx, tc, s, glowScale);
+  }
+
+  function drawSlot(ctx, tc, slot, glowScale){
+    var W = tc.width, H = tc.height;
+    if(tc===cv) state.boxes[slot] = null;
+    var arr = lines(slot); if(!arr.length) return;
     var base = W * parseFloat($('size').value)/100;
     var glow = parseFloat($('glow').value)/100 * (glowScale==null ? 1 : glowScale);
     var c1 = $('c1').value, c2 = $('c2').value;
     var shrink = $('small').checked;
-    var x = state.x*W, y = state.y*H;
+    var x = state.pos[slot].x*W, y = state.pos[slot].y*H;
     var fam = fontStack();
     ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.lineJoin='round';
 
-    if($('mode').value==='plain'){ drawPlain(ctx, tc, arr, base, x, y, fam, c1); return; }
+    if($('mode').value==='plain'){ drawPlain(ctx, tc, slot, arr, base, x, y, fam, c1); return; }
 
     var items = [], cursor = y;
     for(var i=arr.length-1;i>=0;i--){
@@ -132,12 +147,12 @@
       ctx.restore();
       it.w = m.width;
     });
-    if(tc===cv) state.box = { x:x, y:items[0].y - items[0].sz*0.9, w:Math.max.apply(null,items.map(function(i){return i.w})), h:y - (items[0].y - items[0].sz*0.9) + base*0.25 };
+    if(tc===cv) state.boxes[slot] = { x:x, y:items[0].y - items[0].sz*0.9, w:Math.max.apply(null,items.map(function(i){return i.w})), h:y - (items[0].y - items[0].sz*0.9) + base*0.25 };
   }
 
   // flat text for the manga pages. the size is worked out from the height of a
   // capital letter, so it comes out the same size whichever font ends up loading
-  function drawPlain(ctx, tc, arr, base, x, y, fam, color){
+  function drawPlain(ctx, tc, slot, arr, base, x, y, fam, color){
     var t = currentTemplate.text || {};
     var wt = fontWeight();
     ctx.font = wt + ' 100px ' + fam;
@@ -152,7 +167,7 @@
       ctx.fillText(s, x, first + i*pitch);
       maxW = Math.max(maxW, ctx.measureText(s).width);
     });
-    if(tc===cv) state.box = { x:x - maxW/2, y:first - cap, w:maxW, h:cap + (arr.length-1)*pitch };
+    if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:first - cap, w:maxW, h:cap + (arr.length-1)*pitch };
   }
 
   var raf=0;
@@ -166,7 +181,7 @@
     $('txtHint').textContent = $('mode').value==='plain' ? 'One line per row.' : 'One line per row. The last line is the big one.';
   }
   $('mode').addEventListener('change', function(){ syncMode(); schedule(); });
-  ['txt','size','glow','small','upper','c1','c2'].forEach(function(id){
+  ['txt','txt2','size','glow','small','upper','c1','c2'].forEach(function(id){
     $(id).addEventListener('input', function(){ syncLabels(); schedule(); });
   });
   $('font').addEventListener('change', function(){
@@ -199,7 +214,8 @@
   // put the controls back to how this template wants its text
   function applyTextDefaults(tpl, prev){
     var t = tpl.text; if(!t) return;
-    state.x = t.x; state.y = t.y;
+    var sl = slotsOf(tpl), old = slotsOf(prev);
+    state.pos = copyPos(tpl); state.boxes = [];
     $('mode').value = t.mode;
     $('size').value = t.size;
     $('font').value = t.font; $('fontFileWrap').hidden = true;
@@ -209,8 +225,12 @@
     $('small').checked = !!t.small;
     $('upper').checked = !!t.upper;
     // only swap the text if its still the example text from the last template
-    var old = prev && prev.text ? prev.text.sample : null;
-    if(old && $('txt').value.trim().toUpperCase() === old.toUpperCase()) $('txt').value = t.sample;
+    function same(v, s){ return !!s && v.trim().toUpperCase() === s.toUpperCase(); }
+    if(same($('txt').value, old[0].sample)) $('txt').value = sl[0].sample;
+    var two = sl.length > 1;
+    $('txt2Wrap').hidden = !two;
+    if(two && ($('txt2').value.trim()==='' || (old[1] && same($('txt2').value, old[1].sample)))) $('txt2').value = sl[1].sample;
+    $('dragHint').textContent = two ? 'Drag each text on the image to reposition it.' : 'Drag the text on the image to reposition it.';
     syncLabels(); syncMode();
   }
 
@@ -256,13 +276,23 @@
     loadTemplate(currentTemplate, true);
   });
   $('btnReset').addEventListener('click', function(){
-    var t = currentTemplate.text || {};
-    state.x = t.x==null ? .045 : t.x; state.y = t.y==null ? .9 : t.y;
+    state.pos = copyPos(currentTemplate);
     schedule();
   });
 
   // drag the text around
-  var dragging=false, off={x:0,y:0};
+  var dragging=false, off={x:0,y:0}, active=0;
+  // which text did they grab: the one under the pointer, or else the closest one
+  function pickSlot(p){
+    var best = 0, bd = Infinity;
+    for(var i=0; i<state.pos.length; i++){
+      var b = state.boxes[i]; if(!b) continue;
+      var dx = Math.max(b.x - p.x, 0, p.x - (b.x + b.w)), dy = Math.max(b.y - p.y, 0, p.y - (b.y + b.h));
+      var d = dx*dx + dy*dy;
+      if(d < bd){ bd = d; best = i; }
+    }
+    return best;
+  }
   function pos(e){
     var r = cv.getBoundingClientRect();
     return { x:(e.clientX-r.left)/r.width*cv.width, y:(e.clientY-r.top)/r.height*cv.height };
@@ -270,13 +300,15 @@
   cv.addEventListener('pointerdown', function(e){
     var p = pos(e);
     dragging = true; cv.classList.add('drag'); cv.setPointerCapture(e.pointerId);
-    off.x = p.x - state.x*cv.width; off.y = p.y - state.y*cv.height;
+    active = pickSlot(p);
+    off.x = p.x - state.pos[active].x*cv.width; off.y = p.y - state.pos[active].y*cv.height;
   });
   cv.addEventListener('pointermove', function(e){
     if(!dragging) return;
     var p = pos(e);
-    state.x = Math.min(1.2,Math.max(-.2,(p.x-off.x)/cv.width));
-    state.y = Math.min(1.2,Math.max(0,(p.y-off.y)/cv.height));
+    var s = state.pos[active]; if(!s) return;
+    s.x = Math.min(1.2,Math.max(-.2,(p.x-off.x)/cv.width));
+    s.y = Math.min(1.2,Math.max(0,(p.y-off.y)/cv.height));
     schedule();
   });
   function end(){ dragging=false; cv.classList.remove('drag'); }
