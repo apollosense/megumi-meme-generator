@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js
+/* Megumi text generator - app.js (v9)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
