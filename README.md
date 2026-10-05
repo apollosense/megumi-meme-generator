@@ -27,7 +27,7 @@ To add a template, drop the picture into `templ/` and add a line to the `TEMPLAT
 
 ## Fonts
 
-The Geto page is meant to use CC Wild Words, the font manga bubbles are lettered in. It's a paid font so it is not in this repo. If you have it installed it gets used, otherwise the page falls back to Comic Neue. If you own a license you can put the file at `fonts/wildwords.ttf`.
+The Geto page is meant to use CC Wild Words, the font manga bubbles are lettered in. It's a paid font so it is not in this repo. If you have it installed it gets used, otherwise the page falls back to Comic Neue.
 
 No build step and no dependencies. Open `index.html` in a browser, or host the folder on GitHub Pages.
 

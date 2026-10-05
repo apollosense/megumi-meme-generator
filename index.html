@@ -45,11 +45,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@700;800;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap">
 <style>
-/* manga bubble font. uses CC Wild Words if its installed, or if you put the
-   file at fonts/wildwords.ttf. if not it falls back to Comic Neue (see app.js) */
+/* manga bubble font. uses CC Wild Words if its installed on your device,
+   if not it falls back to Comic Neue (see app.js) */
 @font-face{font-family:"Manga Bubble";font-display:swap;
-  src:local("CC Wild Words"),local("CCWildWords-Roman"),local("CCWildWords"),local("Wild Words"),
-      url("fonts/wildwords.ttf") format("truetype")}
+  src:local("CC Wild Words"),local("CCWildWords-Roman"),local("CCWildWords"),local("Wild Words")}
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -128,6 +127,13 @@ footer.mark{margin-top:auto}
 .links{display:flex;gap:8px;flex-wrap:wrap}
 .rbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;
   background:#ff4500;color:#fff;font-size:11px;font-weight:900;line-height:1}
+.gbadge{background:var(--ink);color:var(--panel)}
+.links{align-items:center}
+.ghbig{font-size:17px;font-weight:900;padding:12px 20px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ghbig:hover{border-color:var(--ink)}
+.ghbig .gbadge{width:22px;height:22px;font-size:14px;background:#fff;color:#000}
+.contact{margin-top:8px!important;font-size:14px}
+.contact a{color:var(--accent);font-weight:700}
 </style>
 </head>
 <body>
@@ -140,9 +146,14 @@ footer.mark{margin-top:auto}
           <span class="rbadge" aria-hidden="true">r</span>
           Follow on Reddit
         </a>
+        <a class="xbtn ghbig" href="https://github.com/apollosense" target="_blank" rel="noopener noreferrer">
+          <span class="rbadge gbadge" aria-hidden="true">g</span>
+          Check out my GitHub to support me!!
+        </a>
       </div>
     </div>
     <p>Type your line, drag it into place, save the image. Your images and text are processed in your browser and are only uploaded if you choose Upload to GIPHY. Anonymous visit statistics are collected via Google Analytics.</p>
+    <p class="contact">Contact: <a href="mailto:apollosenseii@gmail.com">apollosenseii@gmail.com</a></p>
   </header>
 
   <section class="stage" aria-label="Preview">
