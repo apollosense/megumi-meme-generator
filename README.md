@@ -6,7 +6,7 @@ Live site: https://apollosense.github.io/megumi-meme-generator/
 
 ## What it does
 
-- Pick a template: the Megumi frame, the Geto manga page or the Yuji one (the Yuji one has two texts, one over each picture)
+- Pick a template: the Megumi frame, the Geto manga page, the Yuji one (two texts, one over each picture) or the "yeah." one
 - Type your own text, or pick one of the quick phrases
 - Drag the text around on the image
 - Change size, glow strength, text color and glow color

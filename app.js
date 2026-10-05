@@ -33,7 +33,13 @@
       text:{ mode:'plain', grow:'middle', size:4.2, lead:1.65, font:'Arial',
              c1:'#000000', small:false, upper:false,
              slots:[ { x:.2767, y:.085, sample:'Left text' },
-                     { x:.7245, y:.085, sample:'Right text' } ] } }
+                     { x:.7245, y:.085, sample:'Right text' } ] } },
+    // the "yeah." one. templ/yuji-yeah.jpg is the original with the text still on it,
+    // the -empty one has it painted out. original text is white Times New Roman,
+    // about 95px, middle of the word at x=258, sitting on y=443 (image is 1125x870)
+    { id:'yuji-yeah',     src:'templ/yuji-yeah-empty.png', label:'Yeah',
+      text:{ mode:'plain', grow:'middle', x:.2293, y:.4722, size:7.6, lead:1.74, font:'Times',
+             c1:'#ffffff', small:false, upper:false, sample:'yeah.' } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -62,19 +68,20 @@
   function fontWeight(){
     var v = $('font').value;
     if(v==='manga') return hasManga() ? '400' : '700';
-    if(v==='Arial') return '400';
+    if(v==='Arial' || v==='Times') return '400';
     return '900';
   }
   function fontStack(){
     var v = $('font').value;
     if(v==='manga') return (hasManga() ? '"Manga Bubble",' : '') + '"Comic Neue","Comic Sans MS","Chalkboard SE",cursive,sans-serif';
     if(v==='Arial') return 'Arial,Helvetica,"Liberation Sans",sans-serif';
+    if(v==='Times') return '"Times New Roman",Times,"Liberation Serif",serif';
     var first = v==='custom' && customFamily ? '"'+customFamily+'"' : (v==='custom' ? '"TikTok Sans"' : v);
     return first + ',"TikTok Sans","Helvetica Neue",Inter,Arial,sans-serif';
   }
   function ensureFont(){
     var v = $('font').value;
-    if(v==='custom' || v==='Arial' || !document.fonts) return Promise.resolve();
+    if(v==='custom' || v==='Arial' || v==='Times' || !document.fonts) return Promise.resolve();
     if(v==='manga'){
       return document.fonts.load('400 60px "Manga Bubble"').catch(function(){}).then(function(){
         if(!hasManga()) return document.fonts.load('700 60px "Comic Neue"').catch(function(){});
