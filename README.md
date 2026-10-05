@@ -6,11 +6,12 @@ Live site: https://apollosense.github.io/megumi-meme-generator/
 
 ## What it does
 
+- Pick a template: the Megumi frame, the Geto manga page or the Yuji one
 - Type your own text, or pick one of the quick phrases
 - Drag the text around on the image
 - Change size, glow strength, text color and glow color
 - Pick a font, or load your own font file
-- Use your own background image instead of the default frame
+- Use your own background image instead of a template
 - Save as PNG, copy the image, or make a GIF with a pulsing glow
 - Optional upload to GIPHY with your own API key
 
@@ -20,6 +21,13 @@ Everything runs in your browser. Nothing is uploaded unless you press the GIPHY 
 
 - `index.html` - the page and its styling
 - `app.js` - everything that makes it work (drawing, GIF maker, GIPHY upload)
+- `templ/` - the template pictures
+
+To add a template, drop the picture into `templ/` and add a line to the `TEMPLATES` list at the top of `app.js`. That list also says where the text starts and how big it is on each picture.
+
+## Fonts
+
+The Geto page is meant to use CC Wild Words, the font manga bubbles are lettered in. It's a paid font so it is not in this repo. If you have it installed it gets used, otherwise the page falls back to Comic Neue. If you own a license you can put the file at `fonts/wildwords.ttf`.
 
 No build step and no dependencies. Open `index.html` in a browser, or host the folder on GitHub Pages.
 
@@ -36,6 +44,7 @@ I used AI (Claude) to help with the parts I didn't know how to do myself. The ma
 - the GIF encoder (palette + compression)
 - the GIPHY upload code
 - the glow / neon text drawing on the canvas
+- lining the text up with the speech bubble on the manga pages
 
 I also used it to help split the original single file into `index.html` and `app.js`. I tried to mark the AI-assisted spots with comments in `app.js`.
 

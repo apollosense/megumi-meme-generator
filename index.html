@@ -9,8 +9,6 @@
 
 <script>
 /* (c) apollosense. All rights reserved. Do not copy or redistribute. */
-// only run on my own site, and don't allow being embedded in other pages.
-// change ALLOWED_HOSTS if the site moves to a different domain.
 (function(){
   var ALLOWED_HOSTS = ["www.apollosense.github.io","apollosense.github.io"];
   var h = location.hostname;
@@ -26,7 +24,6 @@
 })();
 </script>
 
-<!-- Google Analytics, only on the live site -->
 <script>
 (function(){
   if(window.__blocked) return;
@@ -46,7 +43,13 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap">
 <style>
+/* manga bubble font. uses CC Wild Words if its installed, or if you put the
+   file at fonts/wildwords.ttf. if not it falls back to Comic Neue (see app.js) */
+@font-face{font-family:"Manga Bubble";font-display:swap;
+  src:local("CC Wild Words"),local("CCWildWords-Roman"),local("CCWildWords"),local("Wild Words"),
+      url("fonts/wildwords.ttf") format("truetype")}
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -111,6 +114,13 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
   color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
 .xbtn:hover{border-color:var(--accent)}
 .xbtn svg{width:16px;height:16px;fill:currentColor}
+
+/* template picker */
+.templgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
+.templgrid button{padding:0;border-radius:10px;overflow:hidden;border:2px solid var(--line);background:#000;aspect-ratio:4/3;position:relative}
+.templgrid button img{width:100%;height:100%;object-fit:cover;display:block}
+.templgrid button.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.templgrid button span{position:absolute;left:0;right:0;bottom:0;font-size:10px;padding:3px 4px;background:rgba(0,0,0,.6);color:#fff;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 body{min-height:250vh;display:flex;flex-direction:column}
 main{width:100%}
@@ -180,7 +190,11 @@ footer.mark{margin-top:auto}
   </section>
 
   <section class="panel" aria-label="Controls">
-    <label>Text <small>One line per row. The last line is the big one.</small>
+    <label>Template <small>Pick a background frame</small>
+      <div class="templgrid" id="templGrid"></div>
+    </label>
+
+    <label>Text <small id="txtHint">One line per row. The last line is the big one.</small>
       <textarea id="txt" rows="2">HELL YEAH</textarea>
     </label>
     <div class="chips" id="chips">
@@ -191,7 +205,13 @@ footer.mark{margin-top:auto}
     </div>
 
     <label>Size <small id="sizeV"></small>
-      <input type="range" id="size" min="4" max="24" step="0.5" value="11">
+      <input type="range" id="size" min="2" max="24" step="0.1" value="11">
+    </label>
+    <label>Text style
+      <select id="mode">
+        <option value="glow">Glow (Megumi)</option>
+        <option value="plain">Plain (manga page)</option>
+      </select>
     </label>
     <label>Glow strength <small id="glowV"></small>
       <input type="range" id="glow" min="0" max="200" step="5" value="100">
@@ -210,6 +230,8 @@ footer.mark{margin-top:auto}
         <option value='"TikTok Sans"'>TikTok Sans (bold)</option>
         <option value='"Helvetica Neue"'>Helvetica Neue (bold)</option>
         <option value='Inter'>Inter (bold)</option>
+        <option value='manga'>Wild Words (manga bubble)</option>
+        <option value='Arial'>Arial (normal)</option>
         <option value='custom'>My own font file…</option>
       </select>
     </label>
@@ -217,12 +239,11 @@ footer.mark{margin-top:auto}
       <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2">
     </label>
 
-    <label>Background image <small>Optional. Defaults to the Megumi frame.</small>
+    <label>Custom background image <small>Optional. Overrides the template above.</small>
       <input type="file" id="bgFile" accept="image/*">
     </label>
-    <button type="button" id="bgReset">Use the default frame</button>
+    <button type="button" id="bgReset">Use the selected template</button>
   </section>
-</main>
 </main>
 
 <footer class="mark">made by apollosense on every platform!</footer>
