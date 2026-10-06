@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v10)
+/* Megumi text generator - app.js (v10.2)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -20,6 +20,10 @@
   //   lead  plain mode only. line spacing, in capital letter heights
   var TEMPLATES = [
     { id:'megumi-text',   src:'templ/megumi-text.png',   label:'Megumi',
+      text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
+             glow:100, small:true, upper:true, sample:'HELL YEAH' } },
+    // same pose as the megumi one, so it gets the same glow text in the same corner
+    { id:'gojo-shush',    src:'templ/gojo-shush.png',    label:'Gojo',
       text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
              glow:100, small:true, upper:true, sample:'HELL YEAH' } },
     // bubble already says "COMING FROM A MONKEY WHO CAN'T", so the text carries on
