@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v10.2)
+/* Megumi text generator - app.js (v11)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -8,6 +8,9 @@
   // Each image lives in the "templ/" folder next to this file.
   // Add more entries here whenever you drop new images into templ/.
   // The FIRST entry is the default image loaded on page open.
+  // Put new ones at the BOTTOM of the list. The picker shows the first one
+  // (megumi) first and then the rest newest to oldest, so the order here matters.
+  // "tags" are extra words the search box looks at.
   //
   // "text" is how the text starts out on that picture:
   //   mode  'glow' = the megumi neon text, 'plain' = flat text like a manga page,
@@ -19,23 +22,19 @@
   //         'middle' = the whole block is centered on y
   //   lead  plain mode only. line spacing, in capital letter heights
   var TEMPLATES = [
-    { id:'megumi-text',   src:'templ/megumi-text.png',   label:'Megumi',
-      text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
-             glow:100, small:true, upper:true, sample:'HELL YEAH' } },
-    // same pose as the megumi one, so it gets the same glow text in the same corner
-    { id:'gojo-shush',    src:'templ/gojo-shush.png',    label:'Gojo',
+    { id:'megumi-text',   src:'templ/megumi-text.png',   label:'Megumi', tags:'hell yeah glow shush original',
       text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
              glow:100, small:true, upper:true, sample:'HELL YEAH' } },
     // bubble already says "COMING FROM A MONKEY WHO CAN'T", so the text carries on
     // right under that line. numbers measured from the picture: letters are 19px
     // tall, lines are 26.7px apart, bubble middle is at x=400 (picture is 553x780)
-    { id:'geto-monkeys',  src:'templ/geto-monkeys.png',  label:'Geto',
+    { id:'geto-monkeys',  src:'templ/geto-monkeys.png',  label:'Geto', tags:'monkey bubble manga coming from',
       text:{ mode:'plain', grow:'down', x:.7233, y:.3394, size:4.8, lead:1.40, font:'manga',
              c1:'#000000', small:false, upper:true, sample:'READ' } },
     // two captions in the white strip on top (0 to 288px of 1696), one over each
     // picture. left picture is x 84-773, right one is x 773-1470 (image is 1548 wide).
     // "slots" = more than one text on the same template, each has its own x, y
-    { id:'yuji-uncanny',  src:'templ/yuji-uncanny.png',  label:'Yuji',
+    { id:'yuji-uncanny',  src:'templ/yuji-uncanny.png',  label:'Yuji', tags:'uncanny two panel before after manga',
       text:{ mode:'plain', grow:'middle', size:4.2, lead:1.65, font:'Arial',
              c1:'#000000', small:false, upper:false,
              slots:[ { x:.2767, y:.085, sample:'Left text' },
@@ -43,15 +42,24 @@
     // the "yeah." one. templ/yuji-yeah.jpg is the original with the text still on it,
     // the -empty one has it painted out. original text is white Times New Roman,
     // about 95px, middle of the word at x=258, sitting on y=443 (image is 1125x870)
-    { id:'yuji-yeah',     src:'templ/yuji-yeah-empty.png', label:'Yeah',
+    { id:'yuji-yeah',     src:'templ/yuji-yeah-empty.png', label:'Yeah', tags:'yuji black white serif',
       text:{ mode:'plain', grow:'middle', x:.2293, y:.4722, size:7.6, lead:1.74, font:'Times',
              c1:'#ffffff', small:false, upper:false, sample:'yeah.' } },
     // thumbnail style caption along the bottom. templ/todo-cry.png has the original
     // "TEARS OF JOY" painted out. the circle and the arrow are part of the picture.
     // original caption is Bangers at 136px, letters sit on y=635 (picture is 735x646)
-    { id:'todo-cry',      src:'templ/todo-cry.png',      label:'Todo',
+    { id:'todo-cry',      src:'templ/todo-cry.png',      label:'Todo', tags:'tears of joy cry caption thumbnail arrow',
       text:{ mode:'outline', grow:'up', x:.5, y:.9837, size:19, lead:1.3, font:'Bangers',
-             c1:'#dcdcdc', c2:'#e0b92e', small:false, upper:true, sample:'TEARS OF JOY' } }
+             c1:'#dcdcdc', c2:'#e0b92e', small:false, upper:true, sample:'TEARS OF JOY' } },
+    // same pose as the megumi one, so it gets the same glow text in the same corner
+    { id:'gojo-shush',    src:'templ/gojo-shush.png',    label:'Gojo', tags:'shush hell yeah glow',
+      text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
+             glow:100, small:true, upper:true, sample:'HELL YEAH' } },
+    // the two bubbles in the panel stay as they are. your text goes in the empty
+    // white box on top (it is 0 to 361px tall, picture is 1396x1127)
+    { id:'losers-think',  src:'templ/losers-think.png',  label:'Losers', tags:'but thats how losers think manga grin smile',
+      text:{ mode:'plain', grow:'middle', x:.5, y:.16, size:6.2, lead:1.45, font:'manga',
+             c1:'#000000', small:false, upper:true, sample:'YOUR TEXT' } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -304,19 +312,51 @@
     });
   }
 
+  // megumi first, then newest to oldest
+  function pickerOrder(){
+    return [TEMPLATES[0]].concat(TEMPLATES.slice(1).reverse());
+  }
+  function matches(tpl, q){
+    var hay = (tpl.label + ' ' + tpl.id + ' ' + (tpl.tags || '')).toLowerCase();
+    return q.split(/\s+/).every(function(w){ return !w || hay.indexOf(w) > -1; });
+  }
+  function syncArrows(){
+    var g = $('templGrid'); if(!g) return;
+    var max = g.scrollWidth - g.clientWidth;
+    $('templPrev').disabled = g.scrollLeft <= 6;
+    $('templNext').disabled = g.scrollLeft >= max - 6;
+  }
   function renderTemplateGrid(){
     var grid = $('templGrid'); if(!grid) return;
+    var q = ($('templSearch').value || '').trim().toLowerCase();
+    var list = pickerOrder().filter(function(t){ return matches(t, q); });
     grid.innerHTML = '';
-    TEMPLATES.forEach(function(tpl){
+    list.forEach(function(tpl){
       var b = document.createElement('button');
       b.type = 'button';
       b.setAttribute('data-id', tpl.id);
       b.title = tpl.label;
-      b.innerHTML = '<img alt="' + tpl.label + '" src="' + tpl.src + '"><span>' + tpl.label + '</span>';
+      if(currentTemplate && tpl.id === currentTemplate.id) b.classList.add('sel');
+      var im = document.createElement('img'); im.alt = tpl.label; im.loading = 'lazy'; im.src = tpl.src;
+      var sp = document.createElement('span'); sp.textContent = tpl.label;
+      b.appendChild(im); b.appendChild(sp);
       b.addEventListener('click', function(){ loadTemplate(tpl); });
       grid.appendChild(b);
     });
+    $('templEmpty').hidden = list.length > 0;
+    $('templCount').textContent = q ? (list.length + ' of ' + TEMPLATES.length) : (TEMPLATES.length + ' templates, newest first');
+    grid.scrollLeft = 0;
+    syncArrows();
   }
+  function nudge(dir){
+    var g = $('templGrid');
+    g.scrollBy({ left: dir * Math.max(120, g.clientWidth*0.8), behavior:'smooth' });
+  }
+  $('templSearch').addEventListener('input', renderTemplateGrid);
+  $('templPrev').addEventListener('click', function(){ nudge(-1); });
+  $('templNext').addEventListener('click', function(){ nudge(1); });
+  $('templGrid').addEventListener('scroll', syncArrows);
+  window.addEventListener('resize', syncArrows);
 
   $('bgFile').addEventListener('change', function(){
     var f = this.files[0]; if(!f) return;
