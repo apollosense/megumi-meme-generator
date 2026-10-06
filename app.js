@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v9)
+/* Megumi text generator - app.js (v10)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -10,10 +10,12 @@
   // The FIRST entry is the default image loaded on page open.
   //
   // "text" is how the text starts out on that picture:
-  //   mode  'glow' = the megumi neon text, 'plain' = flat text like a manga page
+  //   mode  'glow' = the megumi neon text, 'plain' = flat text like a manga page,
+  //         'outline' = thick comic caption with a black outline, last word in the 2nd color
   //   x, y  where the text sits, 0..1 of the picture width / height
   //   size  slider value. in plain mode the capital letter height is size*0.72 % of the width
-  //   grow  plain mode only. 'down' = y is the first line and more lines go under it,
+  //   grow  plain/outline only. 'up' = y is the last line and more lines stack above it,
+  //         'down' = y is the first line and more lines go under it,
   //         'middle' = the whole block is centered on y
   //   lead  plain mode only. line spacing, in capital letter heights
   var TEMPLATES = [
@@ -39,7 +41,13 @@
     // about 95px, middle of the word at x=258, sitting on y=443 (image is 1125x870)
     { id:'yuji-yeah',     src:'templ/yuji-yeah-empty.png', label:'Yeah',
       text:{ mode:'plain', grow:'middle', x:.2293, y:.4722, size:7.6, lead:1.74, font:'Times',
-             c1:'#ffffff', small:false, upper:false, sample:'yeah.' } }
+             c1:'#ffffff', small:false, upper:false, sample:'yeah.' } },
+    // thumbnail style caption along the bottom. templ/todo-cry.png has the original
+    // "TEARS OF JOY" painted out. the circle and the arrow are part of the picture.
+    // original caption is Bangers at 136px, letters sit on y=635 (picture is 735x646)
+    { id:'todo-cry',      src:'templ/todo-cry.png',      label:'Todo',
+      text:{ mode:'outline', grow:'up', x:.5, y:.9837, size:19, lead:1.3, font:'Bangers',
+             c1:'#dcdcdc', c2:'#e0b92e', small:false, upper:true, sample:'TEARS OF JOY' } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -68,7 +76,7 @@
   function fontWeight(){
     var v = $('font').value;
     if(v==='manga') return hasManga() ? '400' : '700';
-    if(v==='Arial' || v==='Times') return '400';
+    if(v==='Arial' || v==='Times' || v==='Bangers') return '400';
     return '900';
   }
   function fontStack(){
@@ -76,6 +84,7 @@
     if(v==='manga') return (hasManga() ? '"Manga Bubble",' : '') + '"Comic Neue","Comic Sans MS","Chalkboard SE",cursive,sans-serif';
     if(v==='Arial') return 'Arial,Helvetica,"Liberation Sans",sans-serif';
     if(v==='Times') return '"Times New Roman",Times,"Liberation Serif",serif';
+    if(v==='Bangers') return 'Bangers,Impact,"Arial Black",sans-serif';
     var first = v==='custom' && customFamily ? '"'+customFamily+'"' : (v==='custom' ? '"TikTok Sans"' : v);
     return first + ',"TikTok Sans","Helvetica Neue",Inter,Arial,sans-serif';
   }
@@ -87,7 +96,7 @@
         if(!hasManga()) return document.fonts.load('700 60px "Comic Neue"').catch(function(){});
       });
     }
-    return document.fonts.load('800 60px ' + v).catch(function(){});
+    return document.fonts.load((v==='Bangers' ? '400' : '800') + ' 60px ' + v).catch(function(){});
   }
 
   function lines(slot){
@@ -118,7 +127,7 @@
     var fam = fontStack();
     ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.lineJoin='round';
 
-    if($('mode').value==='plain'){ drawPlain(ctx, tc, slot, arr, base, x, y, fam, c1); return; }
+    if($('mode').value!=='glow'){ drawPlain(ctx, tc, slot, arr, base, x, y, fam, c1, c2, $('mode').value==='outline'); return; }
 
     var items = [], cursor = y;
     for(var i=arr.length-1;i>=0;i--){
@@ -159,17 +168,47 @@
 
   // flat text for the manga pages. the size is worked out from the height of a
   // capital letter, so it comes out the same size whichever font ends up loading
-  function drawPlain(ctx, tc, slot, arr, base, x, y, fam, color){
+  function drawPlain(ctx, tc, slot, arr, base, x, y, fam, color, color2, outline){
     var t = currentTemplate.text || {};
     var wt = fontWeight();
     ctx.font = wt + ' 100px ' + fam;
     var asc = ctx.measureText('H').actualBoundingBoxAscent;
     var capRatio = asc > 0 ? asc/100 : 0.72;
     var cap = base*0.72, px = cap/capRatio, pitch = cap*(t.lead || 1.6);
-    var first = t.grow==='middle' ? y - (cap + (arr.length-1)*pitch)/2 + cap : y;
+    var first = t.grow==='middle' ? y - (cap + (arr.length-1)*pitch)/2 + cap
+              : (t.grow==='up' ? y - (arr.length-1)*pitch : y);
     ctx.font = wt + ' ' + px + 'px ' + fam;
+    if(outline){
+      // captions shrink to fit, so a long line never runs off the picture
+      var widest = Math.max.apply(null, arr.map(function(s){ return ctx.measureText(s).width; }));
+      var room = tc.width*0.95 - cap*0.19;
+      if(widest > room && widest > 0){
+        var k = room/widest; px *= k; cap *= k; pitch *= k;
+        if(t.grow==='up') first = y - (arr.length-1)*pitch;
+        else if(t.grow==='middle') first = y - (cap + (arr.length-1)*pitch)/2 + cap;
+        ctx.font = wt + ' ' + px + 'px ' + fam;
+      }
+    }
     ctx.textAlign = 'center'; ctx.fillStyle = color;
     var maxW = 0;
+    if(outline){
+      // comic caption: black outline first, then the letters on top. the last
+      // word of the last line gets the second color (only if there is more than one word)
+      var words = arr.join(' ').trim().split(/\s+/).length;
+      ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = cap*0.19;
+      arr.forEach(function(s, i){
+        var w = ctx.measureText(s).width; maxW = Math.max(maxW, w);
+        ctx.strokeText(s, x - w/2, first + i*pitch);
+      });
+      arr.forEach(function(s, i){
+        var w = ctx.measureText(s).width, lx = x - w/2, by = first + i*pitch;
+        var cut = (i===arr.length-1 && words>1) ? s.replace(/\s+$/,'').lastIndexOf(' ') + 1 : s.length;
+        var head = s.slice(0, cut), tail = s.slice(cut);
+        ctx.fillStyle = color; ctx.fillText(head, lx, by);
+        if(tail){ ctx.fillStyle = color2; ctx.fillText(tail, lx + ctx.measureText(head).width, by); }
+      });
+    } else
     arr.forEach(function(s, i){
       ctx.fillText(s, x, first + i*pitch);
       maxW = Math.max(maxW, ctx.measureText(s).width);
@@ -185,7 +224,9 @@
     $('glowV').textContent = $('glow').value + '%';
   }
   function syncMode(){
-    $('txtHint').textContent = $('mode').value==='plain' ? 'One line per row.' : 'One line per row. The last line is the big one.';
+    var md = $('mode').value;
+    $('txtHint').textContent = md==='plain' ? 'One line per row.' : (md==='outline' ? 'One line per row. The last word gets the highlight color.' : 'One line per row. The last line is the big one.');
+    $('c2Label').textContent = md==='outline' ? 'Highlight color' : 'Glow color';
   }
   $('mode').addEventListener('change', function(){ syncMode(); schedule(); });
   ['txt','txt2','size','glow','small','upper','c1','c2'].forEach(function(id){
@@ -458,7 +499,7 @@
     var th = Math.round(cv.height * tw / cv.width);
     var off = document.createElement('canvas'); off.width = tw; off.height = th;
     var octx = off.getContext('2d', {willReadFrequently:true});
-    var pulse = $('pulse').checked && $('mode').value!=='plain', n = pulse ? GIF_FRAMES : 2, frames = [], i;
+    var pulse = $('pulse').checked && $('mode').value==='glow', n = pulse ? GIF_FRAMES : 2, frames = [], i;
     for(i=0; i<n; i++){
       var gs = pulse ? 0.55 + 0.7*(0.5 - 0.5*Math.cos(2*Math.PI*i/n)) : 1;
       draw(off, gs);
