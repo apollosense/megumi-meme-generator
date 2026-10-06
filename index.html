@@ -134,8 +134,15 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
 .xbtn svg{width:16px;height:16px;fill:currentColor}
 
 /* template picker */
-.templgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
-.templgrid button{padding:0;border-radius:10px;overflow:hidden;border:2px solid var(--line);background:#000;aspect-ratio:4/3;position:relative}
+.tpick{display:grid;gap:8px;font-size:14px;font-weight:700;min-width:0}
+.tpick-head small{font-weight:500;color:var(--muted);margin-left:6px}
+.tpick input[type=search]{font:inherit;font-weight:500;width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink)}
+.tstrip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}
+.tarrow{padding:0;width:30px;height:44px;font-size:22px;line-height:1;display:grid;place-items:center}
+.tarrow:disabled{opacity:.35;cursor:default}
+.tempty{margin:0;font-weight:500;color:var(--muted);font-size:13px}
+.templgrid{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:3px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.templgrid button{flex:0 0 104px;scroll-snap-align:start;padding:0;border-radius:10px;overflow:hidden;border:2px solid var(--line);background:#000;aspect-ratio:4/3;position:relative}
 .templgrid button img{width:100%;height:100%;object-fit:cover;display:block}
 .templgrid button.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .templgrid button span{position:absolute;left:0;right:0;bottom:0;font-size:10px;padding:3px 4px;background:rgba(0,0,0,.6);color:#fff;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -219,9 +226,16 @@ main{width:100%}
   </section>
 
   <section class="panel" aria-label="Controls">
-    <label>Template <small>Pick a background frame</small>
-      <div class="templgrid" id="templGrid"></div>
-    </label>
+    <div class="tpick">
+      <div class="tpick-head"><span>Template</span> <small id="templCount"></small></div>
+      <input type="search" id="templSearch" placeholder="Search templates, like gojo or manga" autocomplete="off" spellcheck="false" aria-label="Search templates">
+      <div class="tstrip">
+        <button type="button" class="tarrow" id="templPrev" aria-label="Show earlier templates">&#8249;</button>
+        <div class="templgrid" id="templGrid"></div>
+        <button type="button" class="tarrow" id="templNext" aria-label="Show more templates">&#8250;</button>
+      </div>
+      <p class="tempty" id="templEmpty" hidden>No template matches that. Try another word.</p>
+    </div>
 
     <label>Text <small id="txtHint">One line per row. The last line is the big one.</small>
       <textarea id="txt" rows="2">HELL YEAH</textarea>
