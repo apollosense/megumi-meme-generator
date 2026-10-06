@@ -51,6 +51,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@700;800;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
 <style>
 /* manga bubble font. uses CC Wild Words if its installed on your device,
    if not it falls back to Comic Neue (see app.js) */
@@ -231,6 +232,7 @@ main{width:100%}
       <select id="mode">
         <option value="glow">Glow (Megumi)</option>
         <option value="plain">Plain (manga page)</option>
+        <option value="outline">Comic caption (outlined)</option>
       </select>
     </label>
     <label>Glow strength <small id="glowV"></small>
@@ -242,7 +244,7 @@ main{width:100%}
 
     <div class="row">
       <label>Text color <input type="color" id="c1" value="#73B5FF"></label>
-      <label>Glow color <input type="color" id="c2" value="#0033FF"></label>
+      <label><span id="c2Label">Glow color</span> <input type="color" id="c2" value="#0033FF"></label>
     </div>
 
     <label>Font
@@ -253,6 +255,7 @@ main{width:100%}
         <option value='manga'>Wild Words (manga bubble)</option>
         <option value='Arial'>Arial (normal)</option>
         <option value='Times'>Times New Roman (serif)</option>
+        <option value='Bangers'>Bangers (comic caption)</option>
         <option value='custom'>My own font file…</option>
       </select>
     </label>
