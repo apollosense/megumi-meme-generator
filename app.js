@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v11)
+/* Megumi text generator - app.js (v11.1)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -23,7 +23,7 @@
   //   lead  plain mode only. line spacing, in capital letter heights
   var TEMPLATES = [
     { id:'megumi-text',   src:'templ/megumi-text.png',   label:'Megumi', tags:'hell yeah glow shush original',
-      text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
+      text:{ mode:'glow', x:.045, y:.9, size:11, font:'Anton', c1:'#73B5FF', c2:'#0033FF',
              glow:100, small:true, upper:true, sample:'HELL YEAH' } },
     // bubble already says "COMING FROM A MONKEY WHO CAN'T", so the text carries on
     // right under that line. numbers measured from the picture: letters are 19px
@@ -53,7 +53,7 @@
              c1:'#dcdcdc', c2:'#e0b92e', small:false, upper:true, sample:'TEARS OF JOY' } },
     // same pose as the megumi one, so it gets the same glow text in the same corner
     { id:'gojo-shush',    src:'templ/gojo-shush.png',    label:'Gojo', tags:'shush hell yeah glow',
-      text:{ mode:'glow', x:.045, y:.9, size:11, font:'"TikTok Sans"', c1:'#73B5FF', c2:'#0033FF',
+      text:{ mode:'glow', x:.045, y:.9, size:11, font:'Anton', c1:'#73B5FF', c2:'#0033FF',
              glow:100, small:true, upper:true, sample:'HELL YEAH' } },
     // the two bubbles in the panel stay as they are. your text goes in the empty
     // white box on top (it is 0 to 361px tall, picture is 1396x1127)
@@ -89,6 +89,7 @@
     var v = $('font').value;
     if(v==='manga') return hasManga() ? '400' : '700';
     if(v==='Arial' || v==='Times' || v==='Bangers') return '400';
+    if(v==='Anton') return '400';
     return '900';
   }
   function fontStack(){
@@ -108,7 +109,7 @@
         if(!hasManga()) return document.fonts.load('700 60px "Comic Neue"').catch(function(){});
       });
     }
-    return document.fonts.load((v==='Bangers' ? '400' : '800') + ' 60px ' + v).catch(function(){});
+    return document.fonts.load(((v==='Bangers' || v==='Anton') ? '400' : '800') + ' 60px ' + v).catch(function(){});
   }
 
   function lines(slot){
@@ -150,7 +151,8 @@
     }
 
     items.forEach(function(it){
-      ctx.font = '900 ' + it.sz + 'px ' + fam;
+      // anton and bangers only come in one weight. asking for 900 makes the browser fake a bolder one
+      ctx.font = (($('font').value==='Anton' || $('font').value==='Bangers') ? '400 ' : '900 ') + it.sz + 'px ' + fam;
       var m = ctx.measureText(it.t);
       var top = it.y - it.sz*0.78;
       var g = ctx.createLinearGradient(0, top, 0, it.y);
