@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v11.1)
+/* Megumi text generator - app.js (v11.2)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -38,7 +38,7 @@
       text:{ mode:'plain', grow:'middle', size:4.2, lead:1.65, font:'Arial',
              c1:'#000000', small:false, upper:false,
              slots:[ { x:.2767, y:.085, sample:'Left text' },
-                     { x:.7245, y:.085, sample:'Right text' } ] } },
+                     { x:.7245, y:.085, sample:'Right text', hint:'Goes over the right picture.' } ] } },
     // the "yeah." one. templ/yuji-yeah.jpg is the original with the text still on it,
     // the -empty one has it painted out. original text is white Times New Roman,
     // about 95px, middle of the word at x=258, sitting on y=443 (image is 1125x870)
@@ -59,7 +59,15 @@
     // white box on top (it is 0 to 361px tall, picture is 1396x1127)
     { id:'losers-think',  src:'templ/losers-think.png',  label:'Losers', tags:'but thats how losers think manga grin smile',
       text:{ mode:'plain', grow:'middle', x:.5, y:.16, size:6.2, lead:1.45, font:'manga',
-             c1:'#000000', small:false, upper:true, sample:'YOUR TEXT' } }
+             c1:'#000000', small:false, upper:true, sample:'YOUR TEXT' } },
+    // community pick from the "post q" folder. two empty bubbles, one per panel.
+    // w and h are the most room the text gets inside each bubble (as part of the
+    // picture's width/height); longer text shrinks to fit. picture is 997x1280
+    { id:'two-bubbles',   src:'templ/two-bubbles.png',   label:'Bubbles', tags:'two panel speech bubble manga smug tired conversation',
+      text:{ mode:'plain', grow:'middle', size:3.9, lead:1.3, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.888, y:.113, w:.19, h:.18, sample:'YOU\nREALLY\nTHOUGHT\nTHAT?' },
+                     { x:.1855, y:.66, w:.24, h:.23, sample:'I JUST\nWANTED TO\nSLEEP.', hint:'Goes in the bottom bubble.' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -192,6 +200,34 @@
     var first = t.grow==='middle' ? y - (cap + (arr.length-1)*pitch)/2 + cap
               : (t.grow==='up' ? y - (arr.length-1)*pitch : y);
     ctx.font = wt + ' ' + px + 'px ' + fam;
+    // slots with a box (speech bubbles): shrink the text until it fits inside
+    var box = (t.slots || [])[slot];
+    if(box && (box.w || box.h) && $('mode').value!=='glow'){
+      // long lines wrap onto new lines first, so a sentence stays readable
+      if(box.w){
+        var room = box.w*tc.width, out = [];
+        arr.forEach(function(s){
+          var words = s.split(/ +/), cur = '';
+          words.forEach(function(w){
+            var tryS = cur ? cur + ' ' + w : w;
+            if(cur && ctx.measureText(tryS).width > room){ out.push(cur); cur = w; } else cur = tryS;
+          });
+          out.push(cur);
+        });
+        arr = out;
+        first = t.grow==='middle' ? y - (cap + (arr.length-1)*pitch)/2 + cap
+              : (t.grow==='up' ? y - (arr.length-1)*pitch : y);
+      }
+      var wid = Math.max.apply(null, arr.map(function(s){ return ctx.measureText(s).width; }));
+      var tall = cap + (arr.length-1)*pitch;
+      var kk = Math.min(1, box.w && wid ? box.w*tc.width/wid : 1, box.h ? box.h*tc.height/tall : 1);
+      if(kk < 1){
+        px *= kk; cap *= kk; pitch *= kk;
+        first = t.grow==='middle' ? y - (cap + (arr.length-1)*pitch)/2 + cap
+              : (t.grow==='up' ? y - (arr.length-1)*pitch : y);
+        ctx.font = wt + ' ' + px + 'px ' + fam;
+      }
+    }
     if(outline){
       // captions shrink to fit, so a long line never runs off the picture
       var widest = Math.max.apply(null, arr.map(function(s){ return ctx.measureText(s).width; }));
@@ -291,6 +327,7 @@
     if(same($('txt').value, old[0].sample)) $('txt').value = sl[0].sample;
     var two = sl.length > 1;
     $('txt2Wrap').hidden = !two;
+    if(two) $('txt2Hint').textContent = (sl[1].hint || 'Goes in the second spot.') + ' One line per row.';
     if(two && ($('txt2').value.trim()==='' || (old[1] && same($('txt2').value, old[1].sample)))) $('txt2').value = sl[1].sample;
     $('dragHint').textContent = two ? 'Drag each text on the image to reposition it.' : 'Drag the text on the image to reposition it.';
     syncLabels(); syncMode();
