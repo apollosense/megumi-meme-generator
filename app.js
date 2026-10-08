@@ -1,4 +1,4 @@
-/* Megumi text generator - app.js (v11.2)
+/* Megumi text generator - app.js (v11.2.1)
    (c) apollosense. All rights reserved. Do not copy or redistribute.
    Parts of this were written with AI help, see README.md. */
 (function(){
@@ -63,11 +63,11 @@
     // community pick from the "post q" folder. two empty bubbles, one per panel.
     // w and h are the most room the text gets inside each bubble (as part of the
     // picture's width/height); longer text shrinks to fit. picture is 997x1280
-    { id:'two-bubbles',   src:'templ/two-bubbles.png',   label:'Bubbles', tags:'two panel speech bubble manga smug tired conversation',
+    { id:'maki-naoya',    src:'templ/maki-naoya.png',    label:'Maki Naoya', tags:'maki naoya zenin two panel speech bubble manga smug tired conversation',
       text:{ mode:'plain', grow:'middle', size:3.9, lead:1.3, font:'manga',
              c1:'#000000', small:false, upper:true,
-             slots:[ { x:.888, y:.113, w:.19, h:.18, sample:'YOU\nREALLY\nTHOUGHT\nTHAT?' },
-                     { x:.1855, y:.66, w:.24, h:.23, sample:'I JUST\nWANTED TO\nSLEEP.', hint:'Goes in the bottom bubble.' } ] } }
+             slots:[ { x:.888, y:.113, w:.19, h:.18, sample:'' },
+                     { x:.1855, y:.66, w:.24, h:.23, sample:'', hint:'Goes in the bottom bubble.' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -323,12 +323,13 @@
     $('small').checked = !!t.small;
     $('upper').checked = !!t.upper;
     // only swap the text if its still the example text from the last template
-    function same(v, s){ return !!s && v.trim().toUpperCase() === s.toUpperCase(); }
+    // an empty example ('') counts too, so templates that start with blank bubbles work
+    function same(v, s){ return s != null && v.trim().toUpperCase() === s.toUpperCase(); }
     if(same($('txt').value, old[0].sample)) $('txt').value = sl[0].sample;
     var two = sl.length > 1;
     $('txt2Wrap').hidden = !two;
     if(two) $('txt2Hint').textContent = (sl[1].hint || 'Goes in the second spot.') + ' One line per row.';
-    if(two && ($('txt2').value.trim()==='' || (old[1] && same($('txt2').value, old[1].sample)))) $('txt2').value = sl[1].sample;
+    if(two && ($('txt2').value.trim()==='' || !old[1] || same($('txt2').value, old[1].sample))) $('txt2').value = sl[1].sample;
     $('dragHint').textContent = two ? 'Drag each text on the image to reposition it.' : 'Drag the text on the image to reposition it.';
     syncLabels(); syncMode();
   }
