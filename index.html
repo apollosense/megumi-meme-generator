@@ -153,6 +153,20 @@ input[type=color]{width:100%;height:40px;padding:2px;border-radius:10px;border:1
 body{min-height:250vh;display:flex;flex-direction:column}
 main{width:100%}
 .links{display:flex;gap:8px;flex-wrap:wrap}
+/* notice shown every time the page opens */
+.notice{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(2,5,14,.62)}
+.notice[hidden]{display:none!important}
+.notice-box{position:relative;width:min(660px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:18px;padding:32px 32px 28px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.notice-box h2{margin:0 44px 14px 0;font-size:clamp(22px,4.6vw,28px);line-height:1.25}
+.notice-text p{margin:0 0 14px;color:var(--muted);font-size:clamp(16px,3.6vw,18px);line-height:1.5}
+.notice-text .notice-sign{color:var(--ink);font-weight:700;margin-top:4px}
+.notice-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.notice-actions .xbtn{font-size:17px;padding:13px 20px}
+.bmc-btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:12px;background:#FFDD00;color:#000;
+  border:1px solid #000;font-weight:800;font-size:18px;text-decoration:none}
+.bmc-btn:hover{filter:brightness(.95)}
+.notice-x{position:absolute;top:14px;right:14px;width:42px;height:42px;padding:0;border-radius:10px;font-size:20px;line-height:1;display:grid;place-items:center}
 .about{max-width:1180px;margin:0 auto 24px;padding:0 16px;width:100%}
 .about>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;color:var(--muted);font-size:15px}
 .about h2{color:var(--ink);font-size:20px;margin:0 0 8px}
@@ -172,15 +186,38 @@ main{width:100%}
 </style>
 </head>
 <body>
+<div class="notice" id="notice" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+  <div class="notice-box">
+    <button type="button" class="notice-x" id="noticeX" aria-label="Close">&#10005;</button>
+    <h2 id="noticeTitle">This is the final version of the Megumi text generator</h2>
+    <div class="notice-text">
+      <p>Hello guys! As y'all can see, we've come to the end of a great adventure.</p>
+      <p>I deleted my Reddit, and I want to do more coding, plus more things in life like sports and school.</p>
+      <p>Y'all can follow me on GitHub to see my new projects. Thanks for using it!</p>
+      <p class="notice-sign">Apollo, aka apollosense<br>&#10084;&#65039;&#127818;</p>
+    </div>
+    <div class="notice-actions">
+      <a class="bmc-btn" href="https://buymeacoffee.com/apollosense" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">&#9749;</span> Buy me a coffee</a>
+      <a class="xbtn" href="https://github.com/apollosense" target="_blank" rel="noopener noreferrer">My GitHub</a>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var n = document.getElementById('notice'), x = document.getElementById('noticeX');
+  function close(){ n.hidden = true; document.removeEventListener('keydown', key); }
+  function key(e){ if(e.key === 'Escape') close(); }
+  x.addEventListener('click', close);
+  n.addEventListener('click', function(e){ if(e.target === n) close(); });
+  document.addEventListener('keydown', key);
+  x.focus();
+})();
+</script>
 <main>
   <header>
     <div class="top">
       <h1>Megumi text generator</h1>
       <div class="links">
-        <a class="xbtn" href="https://www.reddit.com/user/apollosense" target="_blank" rel="noopener noreferrer">
-          <span class="rbadge" aria-hidden="true">r</span>
-          Follow on Reddit
-        </a>
         <a class="xbtn ghbig" href="https://github.com/apollosense" target="_blank" rel="noopener noreferrer">
           <span class="rbadge gbadge" aria-hidden="true">g</span>
           You can donate me from my GitHub
