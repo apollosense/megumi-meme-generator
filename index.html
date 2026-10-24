@@ -167,6 +167,24 @@ main{width:100%}
   border:1px solid #000;font-weight:800;font-size:18px;text-decoration:none}
 .bmc-btn:hover{filter:brightness(.95)}
 .notice-x{position:absolute;top:14px;right:14px;width:42px;height:42px;padding:0;border-radius:10px;font-size:20px;line-height:1;display:grid;place-items:center}
+/* community wall */
+.wall{max-width:1180px;margin:0 auto 20px;padding:0 16px;width:100%}
+.wall>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.wall h2{font-size:20px;margin:0 0 6px}
+.wall-note{margin:0 0 14px;color:var(--muted);font-size:14px;max-width:75ch}
+.wall form{display:grid;gap:12px;max-width:640px}
+.wall textarea{font-weight:500;font-size:16px;min-height:80px}
+.wall-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.wall-status{font-size:13px;color:var(--muted)}
+.wall-done{margin:0;font-weight:700;color:var(--ink)}
+.wall-list{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.wall-list li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--field)}
+.wall-meta{font-size:12px;color:var(--muted);margin-bottom:4px}
+.wall-meta b{color:var(--ink);font-size:13px}
+.wall-body{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.wall-reply{margin-top:10px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--panel);border-radius:0 10px 10px 0}
+.wall-reply .wall-meta b{color:var(--accent)}
+.wall-empty{color:var(--muted);font-size:14px}
 .about{max-width:1180px;margin:0 auto 24px;padding:0 16px;width:100%}
 .about>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;color:var(--muted);font-size:15px}
 .about h2{color:var(--ink);font-size:20px;margin:0 0 8px}
@@ -224,7 +242,7 @@ main{width:100%}
         </a>
       </div>
     </div>
-    <p>Type your line, drag it into place, save the image. Your images and text are processed in your browser and are only uploaded if you choose Upload to GIPHY. Anonymous visit statistics are collected via Google Analytics.</p>
+    <p>Type your line, drag it into place, save the image. Your images and text are processed in your browser and are only uploaded if you choose Upload to GIPHY. Messages on the community wall are public. Anonymous visit statistics are collected via Google Analytics.</p>
     <p class="contact">Contact: <a href="mailto:apollosenseii@gmail.com">apollosenseii@gmail.com</a></p>
   </header>
 
@@ -343,6 +361,27 @@ main{width:100%}
   </section>
 </main>
 
+<section class="wall" id="wall" aria-labelledby="wallTitle">
+  <div>
+    <h2 id="wallTitle">Community wall</h2>
+    <p class="wall-note">Leave one message for apollo. Everyone can read the wall, and only apollo can reply. Messages are public, so don't post personal info.</p>
+    <form id="wallForm" novalidate>
+      <label>Name <small>Optional</small>
+        <input type="text" id="wallName" maxlength="30" autocomplete="nickname" placeholder="Anonymous">
+      </label>
+      <label>Message <small id="wallCount">0 / 300</small>
+        <textarea id="wallBody" rows="3" maxlength="300" placeholder="Say something nice"></textarea>
+      </label>
+      <div class="wall-actions">
+        <button type="submit" class="primary" id="wallSend">Post my message</button>
+        <span class="wall-status" id="wallStatus" role="status"></span>
+      </div>
+    </form>
+    <p class="wall-done" id="wallDone" hidden>Thanks, you've posted your message. You can only post once.</p>
+    <ul class="wall-list" id="wallList" aria-live="polite"></ul>
+  </div>
+</section>
+
 <section class="about" aria-label="About">
   <div>
     <h2>About this Megumi text generator</h2>
@@ -361,5 +400,6 @@ main{width:100%}
 <footer class="mark">made by apollosense</footer>
 
 <script src="app.js"></script>
+<script src="wall.js"></script>
 </body>
 </html>
