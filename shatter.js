@@ -8,13 +8,13 @@
 
   // ---- word check -----------------------------------------------------------
   // whole words that are blocked
-  var WORDS = ('fuck fucker fucking fucked motherfucker shit shitty bullshit bitch bitches cunt dick dickhead cock cocks ' +
+  var WORDS = ('fuck fucker fucking fucked motherfucker fck fuk fuks fuq fack fvck phuck shit shitty bullshit bitch bitches cunt dick dickhead cock cocks ' +
     'pussy pussies asshole assholes arsehole whore slut sluts porn porno pornhub xxx sex sexy nude nudes naked boobs boob tits titties ' +
     'penis vagina cum cumming jizz blowjob handjob dildo horny rape rapist nigga nigger niggas faggot fag fags retard ' +
     'amk aq orospu siktir sik sikik sikiş yarrak yarak göt götveren piç amcık oç ananı ' +
     'сука суки бля блять блядь хуй хуйня пизда пиздец нахуй ебать ебал ебаный шлюха').split(/\s+/);
   // anything that starts with these is blocked too (fuckface, pornhub, ...)
-  var STEMS = ['fuck','shit','cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
+  var STEMS = ['fuck','fack','fvck','phuck','shit','cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
 
   function squash(s){ return s.replace(/(.)\1+/g, '$1'); }          // fuuuuck -> fuck
   function leet(s){ return s.replace(/[0@4$5!1|3€7]/g, function(c){ return {'0':'o','@':'a','4':'a','$':'s','5':'s','!':'i','1':'i','|':'i','3':'e','€':'e','7':'t'}[c]; }); }
@@ -30,13 +30,20 @@
     if(run) out.push(run);
     return out;
   }
-  window.megumiIsExplicit = function(text){
-    return tokens(text).some(function(w){
-      var s = squash(w);
-      if(WORDSET[w] || WORDSET[s]) return true;
-      for(var i=0;i<STEMS.length;i++){ if(w.indexOf(STEMS[i]) === 0 || s.indexOf(STEMSQ[i]) === 0) return true; }
-      return false;
-    });
+  // these are also the start of normal words (dickens, cumulative, sextant,
+  // cockpit, aqua, sikke...), so while you're still typing them they don't count yet
+  var RISKY = { dick:1, cock:1, cocks:1, cum:1, sex:1, fag:1, tits:1, boob:1, nude:1, naked:1, sik:1, aq:1, göt:1, piç:1, oç:1, rape:1, fuk:1 };
+  function bad(w, typing){
+    var s = squash(w);
+    for(var i=0;i<STEMS.length;i++){ if(w.indexOf(STEMS[i]) === 0 || s.indexOf(STEMSQ[i]) === 0) return true; }
+    if(WORDSET[w] || WORDSET[s]) return !(typing && (RISKY[w] || RISKY[s]));
+    return false;
+  }
+  // live = the person is still typing, so the last word may not be finished yet
+  window.megumiIsExplicit = function(text, live){
+    var tk = tokens(text), last = tk.length - 1;
+    var stillTyping = live && /[a-zа-яёçğıöşü0-9@$|!€]$/i.test(String(text));
+    return tk.some(function(w, i){ return bad(w, stillTyping && i === last); });
   };
 
   // ---- the shatter ----------------------------------------------------------
@@ -126,8 +133,11 @@
     var W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
     var r = fromEl && fromEl.getBoundingClientRect ? fromEl.getBoundingClientRect() : null;
     var cx = r ? r.left + r.width/2 : W/2, cy = r ? r.top + r.height/2 : H/2;
+    if(fromEl && typeof fromEl.x === 'number' && !r){ cx = fromEl.x; cy = fromEl.y; }
     if(cx < 0 || cx > W || cy < 0 || cy > H){ cx = W/2; cy = H/2; }
-    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // people with "reduce motion" on still get the break (it's the whole point),
+    // just without the screen shake and with softer flashes
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var cv = document.createElement('canvas');
     cv.width = W*dpr; cv.height = H*dpr;
@@ -157,7 +167,6 @@
     snapshot().then(function(img){
       var t0 = performance.now(), broken = false;
       playSound();
-      if(reduce){ setTimeout(end, BREAK_AT); return; }
 
       function background(){ if(img) ctx.drawImage(img, 0, 0, W, H); }
       function cracks(k){
@@ -186,11 +195,11 @@
           ctx.clearRect(0,0,W,H); background();
         } else if(t < BREAK_AT){                // crack hits, then it just hangs there
           var k = Math.min(1, (t - CRACK_AT) / CRACK_LEN);
-          var shake = t < CRACK_AT + 160 ? (1 - (t-CRACK_AT)/160) * 7 : 0;
+          var shake = !calm && t < CRACK_AT + 160 ? (1 - (t-CRACK_AT)/160) * 7 : 0;
           ctx.clearRect(0,0,W,H);
           ctx.save(); ctx.translate((Math.random()-.5)*shake, (Math.random()-.5)*shake);
           background(); cracks(k); ctx.restore();
-          var f = Math.max(0, 1 - (t - CRACK_AT)/180); if(f > 0){ ctx.fillStyle = 'rgba(255,255,255,' + (f*.5) + ')'; ctx.fillRect(0,0,W,H); }
+          var f = Math.max(0, 1 - (t - CRACK_AT)/180); if(f > 0){ ctx.fillStyle = 'rgba(255,255,255,' + (f*(calm ? .2 : .5)) + ')'; ctx.fillRect(0,0,W,H); }
         } else {                                // the big break: everything flies apart
           if(!broken){
             broken = true;
@@ -213,7 +222,7 @@
             ctx.restore();
           });
           // white flash on the break
-          var f2 = Math.max(0, 1 - el/140); if(f2 > 0){ ctx.fillStyle = 'rgba(255,255,255,' + (f2*.6) + ')'; ctx.fillRect(0,0,W,H); }
+          var f2 = Math.max(0, 1 - el/140); if(f2 > 0){ ctx.fillStyle = 'rgba(255,255,255,' + (f2*(calm ? .2 : .6)) + ')'; ctx.fillRect(0,0,W,H); }
           if(!alive || t > GIVE_UP){ end(); return; }
         }
         requestAnimationFrame(frame);
@@ -250,6 +259,46 @@
     e.preventDefault(); e.stopImmediatePropagation();
     window.megumiShatter(b, 'meme');
   }, true);
+  // ---- break the moment the word is finished, right where it was typed -----
+  // where the text cursor is on screen, by copying the box's text into an
+  // invisible twin and measuring it
+  function caretPoint(el){
+    var r = el.getBoundingClientRect();
+    try{
+      var pos = el.selectionEnd == null ? el.value.length : el.selectionEnd;
+      var cs = getComputedStyle(el), div = document.createElement('div'), span = document.createElement('span');
+      ['boxSizing','width','height','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','paddingTop','paddingRight','paddingBottom','paddingLeft',
+       'fontStyle','fontVariant','fontWeight','fontStretch','fontSize','lineHeight','fontFamily','textAlign','textTransform','textIndent','letterSpacing','wordSpacing','tabSize']
+        .forEach(function(p){ div.style[p] = cs[p]; });
+      var area = el.tagName === 'TEXTAREA';
+      div.style.position = 'fixed'; div.style.visibility = 'hidden'; div.style.left = '-9999px'; div.style.top = '0';
+      div.style.whiteSpace = area ? 'pre-wrap' : 'pre'; div.style.overflowWrap = area ? 'break-word' : 'normal'; div.style.overflow = 'hidden';
+      div.textContent = el.value.slice(0, pos);
+      span.textContent = el.value.slice(pos) || '.';
+      div.appendChild(span); document.body.appendChild(div);
+      var x = r.left + span.offsetLeft + parseFloat(cs.borderLeftWidth) - el.scrollLeft;
+      var y = r.top + span.offsetTop + parseFloat(cs.borderTopWidth) - el.scrollTop + (parseFloat(cs.lineHeight) || parseFloat(cs.fontSize)*1.2)/2;
+      document.body.removeChild(div);
+      return { x: Math.max(r.left, Math.min(r.right, x)), y: Math.max(r.top, Math.min(r.bottom, y)) };
+    }catch(e){ return { x: r.left + r.width/2, y: r.top + r.height/2 }; }
+  }
+  function watch(id, what){
+    var el = document.getElementById(id); if(!el) return;
+    el.addEventListener('focus', function(){ window.megumiPreloadShatter(); }, { once:true });
+    el.addEventListener('input', function(){
+      if(busy || !window.megumiIsExplicit(el.value, true)) return;
+      var p = caretPoint(el);
+      el.blur();
+      window.megumiShatter(p, what);
+    });
+    // a word only counts as finished when you leave the box, so check then too
+    el.addEventListener('change', function(){
+      if(busy || !window.megumiIsExplicit(el.value)) return;
+      window.megumiShatter(caretPoint(el), what);
+    });
+  }
+  watch('txt', 'meme'); watch('txt2', 'meme'); watch('wallBody', 'wall'); watch('wallName', 'wall');
+
   // get the screenshot helper ready once someone starts typing meme text
   ['txt','txt2'].forEach(function(id){
     var el = document.getElementById(id);
