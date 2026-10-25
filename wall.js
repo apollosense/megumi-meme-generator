@@ -59,12 +59,19 @@
   }
 
   $('wallBody').addEventListener('input', function(){ $('wallCount').textContent = this.value.length + ' / 300'; });
+  $('wallBody').addEventListener('focus', function(){ if(window.megumiPreloadShatter) window.megumiPreloadShatter(); }, { once:true });
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
     if(posted()){ showDone(); return; }
     var name = $('wallName').value.trim().slice(0, 30), body = $('wallBody').value.trim().slice(0, 300);
     if(!body){ status.textContent = 'Write a message first.'; $('wallBody').focus(); return; }
+    // explicit stuff never gets sent, the screen breaks instead (shatter.js)
+    if(window.megumiIsExplicit && window.megumiIsExplicit(name + ' ' + body)){
+      status.textContent = '';
+      if(window.megumiShatter) window.megumiShatter($('wallSend'), 'wall'); else status.textContent = 'Keep it clean, that message was not posted.';
+      return;
+    }
     $('wallSend').disabled = true; status.textContent = 'Posting…';
     api('messages', { method:'POST', body: JSON.stringify({ name: name || null, body: body }) })
       .then(function(r){

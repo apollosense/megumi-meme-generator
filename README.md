@@ -24,6 +24,8 @@ Everything runs in your browser. Nothing is uploaded unless you press the GIPHY 
 - `templ/` - the template pictures
 - `wall.js` - the community wall (messages are stored in Supabase)
 - `supabase-setup.sql` - the database setup for the wall, run once in the Supabase SQL editor
+- `shatter.js` - blocks explicit wall messages and memes and breaks the screen instead
+- `sfx/shatter.mp3` - the breaking sound, the animation is timed to it
 
 To add a template, drop the picture into `templ/` and add a line to the `TEMPLATES` list at the top of `app.js`. That list also says where the text starts and how big it is on each picture.
 
