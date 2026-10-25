@@ -8,13 +8,14 @@
 
   // ---- word check -----------------------------------------------------------
   // whole words that are blocked
-  var WORDS = ('fuck fucker fucking fucked motherfucker fck fuk fuks fuq fack fvck phuck shit shitty bullshit bitch bitches cunt dick dickhead cock cocks ' +
+  // "fuck" and its spellings are allowed on purpose, everything else here breaks the screen
+  var WORDS = ('shit shitty bullshit bitch bitches cunt dick dickhead cock cocks ' +
     'pussy pussies asshole assholes arsehole whore slut sluts porn porno pornhub xxx sex sexy nude nudes naked boobs boob tits titties ' +
     'penis vagina cum cumming jizz blowjob handjob dildo horny rape rapist nigga nigger niggas faggot fag fags retard ' +
     'amk aq orospu siktir sik sikik sikiş yarrak yarak göt götveren piç amcık oç ananı ' +
     'сука суки бля блять блядь хуй хуйня пизда пиздец нахуй ебать ебал ебаный шлюха').split(/\s+/);
   // anything that starts with these is blocked too (fuckface, pornhub, ...)
-  var STEMS = ['fuck','fack','fvck','phuck','shit','cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
+  var STEMS = ['shit','cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
 
   function squash(s){ return s.replace(/(.)\1+/g, '$1'); }          // fuuuuck -> fuck
   function leet(s){ return s.replace(/[0@4$5!1|3€7]/g, function(c){ return {'0':'o','@':'a','4':'a','$':'s','5':'s','!':'i','1':'i','|':'i','3':'e','€':'e','7':'t'}[c]; }); }
@@ -32,7 +33,7 @@
   }
   // these are also the start of normal words (dickens, cumulative, sextant,
   // cockpit, aqua, sikke...), so while you're still typing them they don't count yet
-  var RISKY = { dick:1, cock:1, cocks:1, cum:1, sex:1, fag:1, tits:1, boob:1, nude:1, naked:1, sik:1, aq:1, göt:1, piç:1, oç:1, rape:1, fuk:1 };
+  var RISKY = { dick:1, cock:1, cocks:1, cum:1, sex:1, fag:1, tits:1, boob:1, nude:1, naked:1, sik:1, aq:1, göt:1, piç:1, oç:1, rape:1 };
   function bad(w, typing){
     var s = squash(w);
     for(var i=0;i<STEMS.length;i++){ if(w.indexOf(STEMS[i]) === 0 || s.indexOf(STEMSQ[i]) === 0) return true; }
