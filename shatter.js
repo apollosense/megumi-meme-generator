@@ -8,14 +8,14 @@
 
   // ---- word check -----------------------------------------------------------
   // whole words that are blocked
-  // "fuck" and its spellings are allowed on purpose, everything else here breaks the screen
-  var WORDS = ('shit shitty bullshit bitch bitches cunt dick dickhead cock cocks ' +
+  // "fuck" and "shit" (and their spellings) are allowed on purpose, everything else here breaks the screen
+  var WORDS = ('bitch bitches cunt dick dickhead cock cocks ' +
     'pussy pussies asshole assholes arsehole whore slut sluts porn porno pornhub xxx sex sexy nude nudes naked boobs boob tits titties ' +
     'penis vagina cum cumming jizz blowjob handjob dildo horny rape rapist nigga nigger niggas faggot fag fags retard ' +
     'amk aq orospu siktir sik sikik sikiş yarrak yarak göt götveren piç amcık oç ananı ' +
     'сука суки бля блять блядь хуй хуйня пизда пиздец нахуй ебать ебал ебаный шлюха').split(/\s+/);
   // anything that starts with these is blocked too (fuckface, pornhub, ...)
-  var STEMS = ['shit','cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
+  var STEMS = ['cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
 
   function squash(s){ return s.replace(/(.)\1+/g, '$1'); }          // fuuuuck -> fuck
   function leet(s){ return s.replace(/[0@4$5!1|3€7]/g, function(c){ return {'0':'o','@':'a','4':'a','$':'s','5':'s','!':'i','1':'i','|':'i','3':'e','€':'e','7':'t'}[c]; }); }
