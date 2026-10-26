@@ -22,9 +22,11 @@
   //         'middle' = the whole block is centered on y
   //   lead  plain mode only. line spacing, in capital letter heights
   var TEMPLATES = [
+    // size and spot measured from the original "did you say potential" meme,
+    // lined up with this picture using his eyes
     { id:'megumi-text',   src:'templ/megumi-text.png',   label:'Megumi', tags:'hell yeah glow shush original',
-      text:{ mode:'glow', x:.045, y:.9, size:11, font:'Anton', c1:'#73B5FF', c2:'#0033FF',
-             glow:100, small:true, upper:true, sample:'HELL YEAH' } },
+      text:{ mode:'glow', x:.04, y:.883, size:16, font:'Anton', c1:'#76BBF1', c2:'#0033FF',
+             glow:65, small:true, upper:true, sample:'HELL YEAH' } },
     // bubble already says "COMING FROM A MONKEY WHO CAN'T", so the text carries on
     // right under that line. numbers measured from the picture: letters are 19px
     // tall, lines are 26.7px apart, bubble middle is at x=400 (picture is 553x780)
@@ -53,7 +55,7 @@
              c1:'#dcdcdc', c2:'#e0b92e', small:false, upper:true, sample:'TEARS OF JOY' } },
     // same pose as the megumi one, so it gets the same glow text in the same corner
     { id:'gojo-shush',    src:'templ/gojo-shush.png',    label:'Gojo', tags:'shush hell yeah glow',
-      text:{ mode:'glow', x:.045, y:.9, size:11, font:'Anton', c1:'#73B5FF', c2:'#0033FF',
+      text:{ mode:'glow', x:.045, y:.9, size:11, font:'Anton', c1:'#76BBF1', c2:'#0033FF',
              glow:100, small:true, upper:true, sample:'HELL YEAH' } },
     // the two bubbles in the panel stay as they are. your text goes in the empty
     // white box on top (it is 0 to 361px tall, picture is 1396x1127)
@@ -150,38 +152,60 @@
 
     if($('mode').value!=='glow'){ drawPlain(ctx, tc, slot, arr, base, x, y, fam, c1, c2, $('mode').value==='outline'); return; }
 
+    // measured from the original "DID YOU SAY / POTENTIAL" meme: the small line is
+    // 0.4x the big one, sits right on top of it, and starts a bit further in
+    var wt = ($('font').value==='Anton' || $('font').value==='Bangers') ? '400 ' : '900 ';  // one-weight fonts, 900 would fake a bolder one
+    ctx.font = wt + '100px ' + fam;
+    var capR = (ctx.measureText('H').actualBoundingBoxAscent || 78) / 100;
     var items = [], cursor = y;
     for(var i=arr.length-1;i>=0;i--){
       var isLast = i===arr.length-1;
-      var sz = (shrink && !isLast) ? base*0.5 : base;
-      items.unshift({t:arr[i], sz:sz, y:cursor});
-      cursor -= sz*1.08;
+      var sz = (shrink && !isLast) ? base*0.4 : base;
+      items.unshift({t:arr[i], sz:sz, y:cursor, small:!isLast && shrink});
+      cursor -= sz*1.03;
+    }
+    ctx.font = wt + base + 'px ' + fam;
+    var bigW = ctx.measureText(arr[arr.length-1]).width;
+
+    // colours: white at the top of the letters, light blue from the middle down,
+    // a touch of the glow colour at the bottom. c1 is the light blue
+    function mix(a, b, k){
+      var pa = parseInt(a.slice(1),16), pb = parseInt(b.slice(1),16);
+      var r = Math.round(((pa>>16)&255)*(1-k) + ((pb>>16)&255)*k), gg = Math.round(((pa>>8)&255)*(1-k) + ((pb>>8)&255)*k), bb = Math.round((pa&255)*(1-k) + (pb&255)*k);
+      return 'rgb(' + r + ',' + gg + ',' + bb + ')';
     }
 
     items.forEach(function(it){
-      // anton and bangers only come in one weight. asking for 900 makes the browser fake a bolder one
-      ctx.font = (($('font').value==='Anton' || $('font').value==='Bangers') ? '400 ' : '900 ') + it.sz + 'px ' + fam;
+      ctx.font = wt + it.sz + 'px ' + fam;
       var m = ctx.measureText(it.t);
-      var top = it.y - it.sz*0.78;
+      var lx = it.small ? x + bigW*0.13 : x;
+      var top = it.y - it.sz*capR;
       var g = ctx.createLinearGradient(0, top, 0, it.y);
-      g.addColorStop(0, '#eaf4ff');
-      g.addColorStop(.38, c1);
-      g.addColorStop(1, c1);
+      if(it.small){
+        g.addColorStop(0, mix('#ffffff', c1, .55)); g.addColorStop(1, mix(c1, '#ffffff', .1));
+      } else {
+        g.addColorStop(0,   mix('#ffffff', c1, .08));
+        g.addColorStop(.3,  mix('#ffffff', c1, .1));
+        g.addColorStop(.45, mix('#ffffff', c1, .4));
+        g.addColorStop(.62, c1);
+        g.addColorStop(.85, mix(c1, c2, .25));
+        g.addColorStop(1,   mix(c1, c2, .25));
+      }
 
       if(glow>0){
         [[1.0,0.9],[0.55,0.9],[0.25,1]].forEach(function(p){
           ctx.save();
           ctx.shadowColor = c2; ctx.shadowBlur = it.sz*p[0]*glow; ctx.globalAlpha = p[1];
-          ctx.fillStyle = c2; ctx.fillText(it.t, x, it.y);
+          ctx.fillStyle = c2; ctx.fillText(it.t, lx, it.y);
           ctx.restore();
         });
         ctx.save();
-        ctx.strokeStyle = c2; ctx.lineWidth = it.sz*0.07; ctx.strokeText(it.t, x, it.y);
+        ctx.strokeStyle = c2; ctx.lineWidth = it.sz*0.07; ctx.strokeText(it.t, lx, it.y);
         ctx.restore();
       }
       ctx.save();
       ctx.shadowColor = c2; ctx.shadowBlur = it.sz*0.12*Math.max(glow,.2);
-      ctx.fillStyle = g; ctx.fillText(it.t, x, it.y);
+      ctx.fillStyle = g; ctx.fillText(it.t, lx, it.y);
       ctx.restore();
       it.w = m.width;
     });
