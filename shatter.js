@@ -11,16 +11,19 @@
   // "fuck" and "shit" (and their spellings) are allowed on purpose, everything else here breaks the screen
   var WORDS = ('bitch bitches cunt dick dickhead cock cocks ' +
     'pussy pussies asshole assholes arsehole whore slut sluts porn porno pornhub xxx sex sexy nude nudes naked boobs boob tits titties ' +
-    'penis vagina cum cumming jizz blowjob handjob dildo horny rape rapist nigga nigger niggas faggot fag fags retard ' +
+    'penis vagina cum cumming jizz blowjob handjob dildo horny rape rapist nigga niggas niggaz nigger niggers faggot faggots fag fags retard ' +
     'amk aq orospu siktir sik sikik sikiş yarrak yarak göt götveren piç amcık oç ananı ' +
     'сука суки бля блять блядь хуй хуйня пизда пиздец нахуй ебать ебал ебаный шлюха').split(/\s+/);
   // anything that starts with these is blocked too (fuckface, pornhub, ...)
-  var STEMS = ['cunt','bitch','porn','nigg','fagg','whor','slut','dildo','blowj','handj','pussy','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
+  var STEMS = ['cunt','bitch','porn','whore','slut','dildo','blowj','handj','orospu','siktir','siker','sikey','sikim','yarra','amcı','amına','amina','хуй','пизд','ебан','ебат','бля'];
 
-  function squash(s){ return s.replace(/(.)\1+/g, '$1'); }          // fuuuuck -> fuck
+  // stretched words: 3 or more of the same letter in a row. "biiitch" -> "bitch"
+  // and "boooobs" -> "boobs". normal double letters (poorness, sikkim) are left alone
+  function squash(s){ return s.replace(/(.)\1{2,}/g, '$1'); }
+  function squash2(s){ return s.replace(/(.)\1{2,}/g, '$1$1'); }
   function leet(s){ return s.replace(/[0@4$5!1|3€7]/g, function(c){ return {'0':'o','@':'a','4':'a','$':'s','5':'s','!':'i','1':'i','|':'i','3':'e','€':'e','7':'t'}[c]; }); }
-  var WORDSET = {}; WORDS.forEach(function(w){ if(w){ WORDSET[w] = 1; WORDSET[squash(w)] = 1; } });
-  var STEMSQ = STEMS.map(squash);
+  var WORDSET = Object.create(null);   // plain {} would think "constructor" is a bad word
+  WORDS.forEach(function(w){ if(w) WORDSET[w] = 1; });
 
   function tokens(text){
     var t = leet(String(text).toLowerCase());
@@ -31,14 +34,18 @@
     if(run) out.push(run);
     return out;
   }
-  // these are also the start of normal words (dickens, cumulative, sextant,
-  // cockpit, aqua, sikke...), so while you're still typing them they don't count yet
-  var RISKY = { dick:1, cock:1, cocks:1, cum:1, sex:1, fag:1, tits:1, boob:1, nude:1, naked:1, sik:1, aq:1, göt:1, piç:1, oç:1, rape:1 };
+  // while a word is still being typed only the STEMS count, because whole words
+  // like "dick", "cum" or "nude" are also the start of normal words (dickens,
+  // cumulative, nudge). whole words count once you finish them with a space,
+  // punctuation, or by leaving the box
   function bad(w, typing){
-    var s = squash(w);
-    for(var i=0;i<STEMS.length;i++){ if(w.indexOf(STEMS[i]) === 0 || s.indexOf(STEMSQ[i]) === 0) return true; }
-    if(WORDSET[w] || WORDSET[s]) return !(typing && (RISKY[w] || RISKY[s]));
-    return false;
+    var s = squash(w), s2 = squash2(w);
+    for(var i=0;i<STEMS.length;i++){
+      var st = STEMS[i];
+      if(w.indexOf(st) === 0 || s.indexOf(st) === 0 || s2.indexOf(st) === 0) return true;
+    }
+    if(typing) return false;
+    return !!(WORDSET[w] || WORDSET[s] || WORDSET[s2]);
   }
   // live = the person is still typing, so the last word may not be finished yet
   window.megumiIsExplicit = function(text, live){
