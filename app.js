@@ -75,8 +75,8 @@
     // flat at 22.5%, bottoms bend up 10% in the middle, yellow #FAED09 on #189EF2.
     // the credits are a small caps line then bigger lines, in a futura look-alike
     { id:'invincible',    src:'templ/invincible-title.jpg', label:'Invincible title card', tags:'invincible title card mark grayson omni man amazon blue yellow show intro',
-      text:{ mode:'title', size:22, squeeze:.74, thick:.035, font:'"Big Shoulders Display"', c1:'#FAED09', c2:'#189EF2', upper:false,
-             slots:[ { x:.5, y:.225, sample:'INVINCIBLE' },
+      text:{ mode:'title', size:22, font:'titlecard', c1:'#FAED09', c2:'#189EF2', upper:false,
+             slots:[ { x:.5, y:.225, sample:'THINK MARK!' },
                      { x:.5, y:.731, sample:'BASED ON THE COMIC BOOK BY\nRobert Kirkman, Cory Walker, & Ryan Ottley',
                        hint:'Small credits under the title. The first line is the smaller one. Leave it empty for no credits.' } ] } },
     { id:'reggie-con-artist', src:'templ/reggie-con-artist.png', label:'Reggie con artist', tags:'reggie star jjk jujutsu kaisen sorcerer con artist culling game manga speech bubble',
@@ -127,14 +127,15 @@
   }
   function ensureFont(){
     var v = $('font').value;
+    var credits = $('mode').value==='title' && document.fonts ? document.fonts.load('500 40px Jost').catch(function(){}) : null;
+    if(v==='titlecard') return Promise.resolve(credits);
     if(v==='custom' || v==='Arial' || v==='Times' || !document.fonts) return Promise.resolve();
     if(v==='manga'){
       return document.fonts.load('400 60px "Manga Bubble"').catch(function(){}).then(function(){
         if(!hasManga()) return document.fonts.load('700 60px "Comic Neue"').catch(function(){});
       });
     }
-    var extra = $('mode').value==='title' ? document.fonts.load('500 40px Jost').catch(function(){}) : null;
-    return Promise.all([extra, document.fonts.load(((v==='Bangers' || v==='Anton') ? '400' : (v.indexOf('Big Shoulders') > -1 ? '900' : '800')) + ' 60px ' + v).catch(function(){})]);
+    return document.fonts.load(((v==='Bangers' || v==='Anton') ? '400' : '800') + ' 60px ' + v).catch(function(){});
   }
 
   function lines(slot){
@@ -327,38 +328,10 @@
       if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:y - W*.02, w:maxW, h:by - y + W*.025 };
       return;
     }
-    arr = arr.map(function(s){ return s.toUpperCase(); });
-    var wt = fontWeight();
-    ctx.font = wt + ' 100px ' + fam;
-    var m = ctx.measureText('H'), capR = (m.actualBoundingBoxAscent || 72)/100;
-    var cap = W*parseFloat($('size').value)/100;      // letter height in the middle
-    var px = cap/capR, bend = .10, gap = cap*.16;
-    // the real letters are narrower and chunkier than any free font, so squeeze
-    // them sideways and thicken them with an outline in the same colour
-    var tt = currentTemplate.text || {}, sq = tt.mode==='title' && tt.squeeze || 1, thick = tt.mode==='title' && tt.thick || 0;
-    ctx.font = wt + ' ' + px + 'px ' + fam;
-    var widest = Math.max.apply(null, arr.map(function(s){ return ctx.measureText(s).width*sq + cap*thick; }));
-    var room = W*.82;
-    if(widest > room){ var k = room/widest; px *= k; cap *= k; gap *= k; ctx.font = wt + ' ' + px + 'px ' + fam; }
-    var top = y, maxW = 0;
-    arr.forEach(function(s){
-      var pad = Math.ceil(cap*thick) + 2, w = Math.ceil(ctx.measureText(s).width*sq) + pad*2, hh = Math.ceil(cap*1.25) + pad;
-      if(w < 6){ top += cap + gap; return; }
-      var off = document.createElement('canvas'); off.width = w; off.height = hh;
-      var o = off.getContext('2d');
-      o.font = ctx.font; o.fillStyle = o.strokeStyle = color; o.textBaseline = 'alphabetic';
-      o.lineJoin = 'miter'; o.lineWidth = cap*thick;
-      o.setTransform(sq, 0, 0, 1, pad, 0);
-      o.fillText(s, 0, cap + pad/2); if(thick) o.strokeText(s, 0, cap + pad/2);
-      var left = x - w/2, step = 2;
-      for(var cx = 0; cx < w; cx += step){
-        var u = (cx + step/2 - w/2)/(w/2), sc = 1 + bend*u*u;
-        ctx.drawImage(off, cx, 0, step, hh, left + cx, top - pad/2, step + .5, hh*sc);
-      }
-      maxW = Math.max(maxW, w);
-      top += cap*(1 + bend) + gap;
-    });
-    if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:y, w:maxW, h:top - y - gap };
+    // the big title uses the hand made letters from titlecard.js
+    var cap = W*parseFloat($('size').value)/100;
+    var box = window.TitleCard.draw(ctx, arr, { cx:x, top:y, cap:cap, maxW:W*.82, color:color });
+    if(tc===cv) state.boxes[slot] = box;
   }
 
   var raf=0;

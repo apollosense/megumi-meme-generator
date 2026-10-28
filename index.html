@@ -66,7 +66,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&family=Jost:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap">
 <style>
 /* manga bubble font. uses CC Wild Words if its installed on your device,
    if not it falls back to Comic Neue (see app.js) */
@@ -181,6 +181,8 @@ main{width:100%}
 .wall-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .wall-status{font-size:13px;color:var(--muted)}
 .wall-done{margin:0;font-weight:700;color:var(--ink)}
+.inv-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#169AF5;color:#FAE800;font-weight:800;text-decoration:none;border:2px solid #FAE800;letter-spacing:.02em}
+.inv-btn:hover{filter:brightness(1.1)}
 .wall-list{list-style:none;margin:18px 0 0;padding:0 6px 0 0;display:grid;gap:10px;max-height:min(560px,70vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .wall-list li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--field)}
 .wall-meta{font-size:12px;color:var(--muted);margin-bottom:4px}
@@ -223,6 +225,7 @@ main{width:100%}
       <p class="notice-sign">Apollo, aka apollosense<br>&#10084;&#65039;&#127818;</p>
     </div>
     <div class="notice-actions">
+      <a class="inv-btn" href="https://apollosense.github.io/INVINCIBLER/" target="_blank" rel="noopener">Try INVINCIBLER</a>
       <a class="bmc-btn" href="https://buymeacoffee.com/apollosense" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">&#9749;</span> Buy me a coffee</a>
       <a class="xbtn" href="https://github.com/apollosense" target="_blank" rel="noopener noreferrer">My GitHub</a>
     </div>
@@ -356,7 +359,7 @@ main{width:100%}
         <option value='Arial'>Arial (normal)</option>
         <option value='Times'>Times New Roman (serif)</option>
         <option value='Bangers'>Bangers (comic caption)</option>
-        <option value='"Big Shoulders Display"'>Big Shoulders (title card)</option>
+        <option value='titlecard'>Title card letters (built in)</option>
         <option value='custom'>My own font file…</option>
       </select>
     </label>
@@ -426,6 +429,7 @@ main{width:100%}
 
 <footer class="mark">made by apollosense<br><small class="vibe">i vibecoded this btw. im still learning</small></footer>
 
+<script src="titlecard.js"></script>
 <script src="app.js"></script>
 <script src="shatter.js"></script>
 <script src="wall.js"></script>
