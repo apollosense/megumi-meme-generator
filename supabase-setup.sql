@@ -69,3 +69,37 @@ drop trigger if exists messages_reply_time on public.messages;
 create trigger messages_reply_time
   before update on public.messages
   for each row execute function public.messages_reply_time();
+
+-- 6. block slurs and explicit words on the server too (people can post straight
+--    to the API and skip the website's filter). catches look-alike letters,
+--    a lowercase l in place of an I, spaces and dots between letters
+create or replace function public.wall_norm(t text) returns text language sql immutable as $$
+  select translate(lower(normalize(coalesce(t,''), NFKC)),
+    '0@4$5!1|3€7аеорсухкмтнвіїјѕıοαιενκρτυ',
+    'oaassiiieetaeopcyxkmthbiijsioaieevkptu')
+$$;
+
+create or replace function public.wall_is_bad(t text) returns boolean language plpgsql immutable as $$
+declare n text; tight text; v text;
+begin
+  n := public.wall_norm(t);
+  foreach v in array array[n, replace(n,'l','i')] loop
+    tight := regexp_replace(v, '[^a-zçğöşü]', '', 'g');
+    tight := regexp_replace(tight, '(.)\1{2,}', '\1\1', 'g');
+    if tight ~ '(nigg(er|a|az|as|ers)|faggot)' then return true; end if;
+    if regexp_replace(v, '(.)\1{2,}', '\1\1', 'g') ~ '(^|[^a-z])(cunt|porn|whore|slut|dildo|blowj|orospu|siktir|retard|fags?([^a-z]|$))' then return true; end if;
+  end loop;
+  return false;
+end $$;
+
+create or replace function public.wall_check() returns trigger language plpgsql as $$
+begin
+  if public.wall_is_bad(new.name) or public.wall_is_bad(new.body) then
+    raise exception 'message not allowed' using errcode = '23514';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists wall_check on public.messages;
+create trigger wall_check before insert or update of name, body on public.messages
+  for each row execute function public.wall_check();

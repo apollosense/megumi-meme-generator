@@ -66,6 +66,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&family=Jost:wght@500&display=swap">
 <style>
 /* manga bubble font. uses CC Wild Words if its installed on your device,
    if not it falls back to Comic Neue (see app.js) */
@@ -180,7 +181,7 @@ main{width:100%}
 .wall-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .wall-status{font-size:13px;color:var(--muted)}
 .wall-done{margin:0;font-weight:700;color:var(--ink)}
-.wall-list{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.wall-list{list-style:none;margin:18px 0 0;padding:0 6px 0 0;display:grid;gap:10px;max-height:min(560px,70vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .wall-list li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--field)}
 .wall-meta{font-size:12px;color:var(--muted);margin-bottom:4px}
 .wall-meta b{color:var(--ink);font-size:13px}
@@ -331,6 +332,7 @@ main{width:100%}
         <option value="glow">Glow (Megumi)</option>
         <option value="plain">Plain (manga page)</option>
         <option value="outline">Comic caption (outlined)</option>
+        <option value="title">Title card (Invincible)</option>
       </select>
     </label>
     <label>Glow strength <small id="glowV"></small>
@@ -355,6 +357,7 @@ main{width:100%}
         <option value='Arial'>Arial (normal)</option>
         <option value='Times'>Times New Roman (serif)</option>
         <option value='Bangers'>Bangers (comic caption)</option>
+        <option value='"Big Shoulders Display"'>Big Shoulders (title card)</option>
         <option value='custom'>My own font file…</option>
       </select>
     </label>
@@ -392,8 +395,11 @@ main{width:100%}
 
 <section class="about news" aria-labelledby="newsTitle">
   <div>
-    <h2 id="newsTitle">What's new <small>last updated 26 Oct 2026</small></h2>
+    <h2 id="newsTitle">What's new <small>last updated 28 Oct 2026</small></h2>
     <ul class="news-list">
+      <li><b>28 Oct</b> new templates: Invincible title card and Reggie "a sorcerer is nothing but a con artist"</li>
+      <li><b>28 Oct</b> the community wall now scrolls instead of going on forever</li>
+      <li><b>28 Oct</b> the wall filter now catches look-alike letter tricks too</li>
       <li><b>26 Oct</b> Megumi text colours and placement now match the original "did you say potential" meme</li>
       <li><b>26 Oct</b> fixed the word filter breaking on normal words like "night"</li>
       <li><b>26 Oct</b> cleaned up a stray line on Megumi's cheek</li>

@@ -15,6 +15,7 @@
   // "text" is how the text starts out on that picture:
   //   mode  'glow' = the megumi neon text, 'plain' = flat text like a manga page,
   //         'outline' = thick comic caption with a black outline, last word in the 2nd color
+  //         'title' = invincible title card: one huge arched word, small credits under it
   //   x, y  where the text sits, 0..1 of the picture width / height
   //   size  slider value. in plain mode the capital letter height is size*0.72 % of the width
   //   grow  plain/outline only. 'up' = y is the last line and more lines stack above it,
@@ -69,7 +70,20 @@
       text:{ mode:'plain', grow:'middle', size:3.9, lead:1.3, font:'manga',
              c1:'#000000', small:false, upper:true,
              slots:[ { x:.888, y:.113, w:.19, h:.18, sample:'' },
-                     { x:.1855, y:.66, w:.24, h:.23, sample:'', hint:'Goes in the bottom bubble.' } ] } }
+                     { x:.1855, y:.66, w:.24, h:.23, sample:'', hint:'Goes in the bottom bubble.' } ] } },
+    // measured from the real card (1920x1080): title spans 82% of the width, tops
+    // flat at 22.5%, bottoms bend up 10% in the middle, yellow #FAED09 on #189EF2.
+    // the credits are a small caps line then bigger lines, in a futura look-alike
+    { id:'invincible',    src:'templ/invincible-title.jpg', label:'Invincible title card', tags:'invincible title card mark grayson omni man amazon blue yellow show intro',
+      text:{ mode:'title', size:22, squeeze:.74, thick:.035, font:'"Big Shoulders Display"', c1:'#FAED09', c2:'#189EF2', upper:false,
+             slots:[ { x:.5, y:.225, sample:'INVINCIBLE' },
+                     { x:.5, y:.731, sample:'BASED ON THE COMIC BOOK BY\nRobert Kirkman, Cory Walker, & Ryan Ottley',
+                       hint:'Small credits under the title. The first line is the smaller one. Leave it empty for no credits.' } ] } },
+    { id:'reggie-con-artist', src:'templ/reggie-con-artist.png', label:'Reggie con artist', tags:'reggie star jjk jujutsu kaisen sorcerer con artist culling game manga speech bubble',
+      text:{ mode:'plain', grow:'middle', size:3.9, lead:1.3, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.823, y:.217, w:.2, h:.16, sample:'A SOR-\nCERER...' },
+                     { x:.255, y:.738, w:.27, h:.2, sample:'...IS\nNOTHING\nBUT A CON\nARTIST.', hint:'Goes in the bottom bubble.' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -119,7 +133,8 @@
         if(!hasManga()) return document.fonts.load('700 60px "Comic Neue"').catch(function(){});
       });
     }
-    return document.fonts.load(((v==='Bangers' || v==='Anton') ? '400' : '800') + ' 60px ' + v).catch(function(){});
+    var extra = $('mode').value==='title' ? document.fonts.load('500 40px Jost').catch(function(){}) : null;
+    return Promise.all([extra, document.fonts.load(((v==='Bangers' || v==='Anton') ? '400' : (v.indexOf('Big Shoulders') > -1 ? '900' : '800')) + ' 60px ' + v).catch(function(){})]);
   }
 
   function lines(slot){
@@ -150,6 +165,7 @@
     var fam = fontStack();
     ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.lineJoin='round';
 
+    if($('mode').value==='title'){ drawTitle(ctx, tc, slot, arr, x, y, fam, c1); return; }
     if($('mode').value!=='glow'){ drawPlain(ctx, tc, slot, arr, base, x, y, fam, c1, c2, $('mode').value==='outline'); return; }
 
     // measured from the original "DID YOU SAY / POTENTIAL" meme: the small line is
@@ -290,6 +306,61 @@
     if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:first - cap, w:maxW, h:cap + (arr.length-1)*pitch };
   }
 
+  // invincible title card. slot 0 is the big title: x,y = middle of its top edge.
+  // each line is drawn flat first, then copied over in thin columns that get
+  // taller towards the ends, so the bottom edge bends like the real logo
+  function drawTitle(ctx, tc, slot, arr, x, y, fam, color){
+    var W = tc.width, H = tc.height;
+    ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+    if(slot){
+      // credits: first line small caps, the rest a bit bigger, like the real card
+      var f = '500 1px Jost,Futura,"Century Gothic","Trebuchet MS",sans-serif', maxW = 0, by = y;
+      ctx.textAlign = 'center';
+      arr.forEach(function(s, i){
+        var cap = W*(i===0 && arr.length>1 ? .0141 : .0198);
+        if(i) by += W*(i===1 ? .0406 : .034);
+        ctx.font = f.replace('1px', (cap/.7) + 'px');
+        var w = ctx.measureText(s).width, k = Math.min(1, W*.9/w);
+        if(k < 1){ ctx.font = f.replace('1px', (cap/.7*k) + 'px'); w *= k; }
+        ctx.fillText(s, x, by); maxW = Math.max(maxW, w);
+      });
+      if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:y - W*.02, w:maxW, h:by - y + W*.025 };
+      return;
+    }
+    arr = arr.map(function(s){ return s.toUpperCase(); });
+    var wt = fontWeight();
+    ctx.font = wt + ' 100px ' + fam;
+    var m = ctx.measureText('H'), capR = (m.actualBoundingBoxAscent || 72)/100;
+    var cap = W*parseFloat($('size').value)/100;      // letter height in the middle
+    var px = cap/capR, bend = .10, gap = cap*.16;
+    // the real letters are narrower and chunkier than any free font, so squeeze
+    // them sideways and thicken them with an outline in the same colour
+    var tt = currentTemplate.text || {}, sq = tt.mode==='title' && tt.squeeze || 1, thick = tt.mode==='title' && tt.thick || 0;
+    ctx.font = wt + ' ' + px + 'px ' + fam;
+    var widest = Math.max.apply(null, arr.map(function(s){ return ctx.measureText(s).width*sq + cap*thick; }));
+    var room = W*.82;
+    if(widest > room){ var k = room/widest; px *= k; cap *= k; gap *= k; ctx.font = wt + ' ' + px + 'px ' + fam; }
+    var top = y, maxW = 0;
+    arr.forEach(function(s){
+      var pad = Math.ceil(cap*thick) + 2, w = Math.ceil(ctx.measureText(s).width*sq) + pad*2, hh = Math.ceil(cap*1.25) + pad;
+      if(w < 6){ top += cap + gap; return; }
+      var off = document.createElement('canvas'); off.width = w; off.height = hh;
+      var o = off.getContext('2d');
+      o.font = ctx.font; o.fillStyle = o.strokeStyle = color; o.textBaseline = 'alphabetic';
+      o.lineJoin = 'miter'; o.lineWidth = cap*thick;
+      o.setTransform(sq, 0, 0, 1, pad, 0);
+      o.fillText(s, 0, cap + pad/2); if(thick) o.strokeText(s, 0, cap + pad/2);
+      var left = x - w/2, step = 2;
+      for(var cx = 0; cx < w; cx += step){
+        var u = (cx + step/2 - w/2)/(w/2), sc = 1 + bend*u*u;
+        ctx.drawImage(off, cx, 0, step, hh, left + cx, top - pad/2, step + .5, hh*sc);
+      }
+      maxW = Math.max(maxW, w);
+      top += cap*(1 + bend) + gap;
+    });
+    if(tc===cv) state.boxes[slot] = { x:x - maxW/2, y:y, w:maxW, h:top - y - gap };
+  }
+
   var raf=0;
   function schedule(){ cancelAnimationFrame(raf); raf=requestAnimationFrame(function(){ ensureFont().then(function(){ draw(); }); }); }
 
@@ -299,7 +370,7 @@
   }
   function syncMode(){
     var md = $('mode').value;
-    $('txtHint').textContent = md==='plain' ? 'One line per row.' : (md==='outline' ? 'One line per row. The last word gets the highlight color.' : 'One line per row. The last line is the big one.');
+    $('txtHint').textContent = md==='title' ? 'The big title. Keep it short, it shrinks to fit.' : md==='plain' ? 'One line per row.' : (md==='outline' ? 'One line per row. The last word gets the highlight color.' : 'One line per row. The last line is the big one.');
     $('c2Label').textContent = md==='outline' ? 'Highlight color' : 'Glow color';
   }
   $('mode').addEventListener('change', function(){ syncMode(); schedule(); });
