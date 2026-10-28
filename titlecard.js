@@ -119,11 +119,12 @@
     var bend = o.bend == null ? .10 : o.bend, fan = o.fan == null ? .065 : o.fan, lg = o.lineGap == null ? 16 : o.lineGap;
     var L = lines.map(layout), wt = Math.max.apply(null, L.map(function(l){ return l.w; }).concat([1]));
     var bh = L.length*100 + (L.length-1)*lg;
-    var k = o.cap/100;
-    if(o.maxW && wt*k*(1+fan) > o.maxW) k = o.maxW/(wt*(1+fan));
+    var k = o.cap/100, sx = o.sx || 1;   // sx: wider or narrower letters
+    if(o.maxW && wt*k*sx*(1+fan) > o.maxW) k = o.maxW/(wt*sx*(1+fan));
+    if(o.maxH && bh*k*(1+bend) > o.maxH) k = o.maxH/(bh*(1+bend));   // tall multi-line titles shrink too
     function P(X, Y){
       var u = Math.max(-1, Math.min(1, (X - wt/2)/(wt/2))), v = Math.max(0, Y/bh);
-      return [o.cx + (X - wt/2)*k*(1 + fan*v), o.top + Y*k*(1 + bend*u*u)];
+      return [o.cx + (X - wt/2)*k*sx*(1 + fan*v), o.top + Y*k*(1 + bend*u*u)];
     }
     ctx.fillStyle = o.color;
     L.forEach(function(l, li){
@@ -147,7 +148,7 @@
         });
       });
     });
-    var half = wt/2*k*(1+fan);
+    var half = wt/2*k*sx*(1+fan);
     // bottom = where the middle of the last line ends (the curve's highest point)
     return { x:o.cx - half, y:o.top, w:half*2, h:bh*k*(1+bend), bottom:o.top + bh*k, k:k };
   }

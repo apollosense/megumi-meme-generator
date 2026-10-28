@@ -181,6 +181,7 @@ main{width:100%}
 .wall-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .wall-status{font-size:13px;color:var(--muted)}
 .wall-done{margin:0;font-weight:700;color:var(--ink)}
+.notice-video{display:block;width:100%;aspect-ratio:16/9;border-radius:10px;background:#000;margin:4px 0 12px}
 .inv-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#169AF5;color:#FAE800;font-weight:800;text-decoration:none;border:2px solid #FAE800;letter-spacing:.02em}
 .inv-btn:hover{filter:brightness(1.1)}
 .wall-list{list-style:none;margin:18px 0 0;padding:0 6px 0 0;display:grid;gap:10px;max-height:min(560px,70vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
@@ -217,6 +218,7 @@ main{width:100%}
   <div class="notice-box">
     <button type="button" class="notice-x" id="noticeX" aria-label="Close">&#10005;</button>
     <h2 id="noticeTitle">new website is ON!</h2>
+    <video class="notice-video" src="invincibler-trailer.mp4" poster="invincibler-trailer.jpg" controls playsinline preload="none"></video>
     <div class="notice-text">
       <p>Hello guys!</p>
       <p>So i made a NEW website, its called <b>INVINCIBLER</b>. you know the Invincible title card, the big yellow letters on the blue background? yea. you type whatever you want and it turns into that. no sign up and its free.</p>
