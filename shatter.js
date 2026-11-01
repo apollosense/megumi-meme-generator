@@ -281,7 +281,8 @@
     var b = e.target && e.target.closest ? e.target.closest('button') : null;
     if(!b || !EXPORT_BUTTONS[b.id]) return;
     var t1 = document.getElementById('txt'), t2 = document.getElementById('txt2'), w2 = document.getElementById('txt2Wrap');
-    var text = (t1 ? t1.value : '') + ' ' + (t2 && w2 && !w2.hidden ? t2.value : '');
+    var t3 = document.getElementById('txt3'), w3 = document.getElementById('txt3Wrap');
+    var text = (t1 ? t1.value : '') + ' ' + (t2 && w2 && !w2.hidden ? t2.value : '') + ' ' + (t3 && w3 && !w3.hidden ? t3.value : '');
     if(!window.megumiIsExplicit(text)) return;
     e.preventDefault(); e.stopImmediatePropagation();
     window.megumiShatter(b, 'meme');
@@ -324,10 +325,10 @@
       window.megumiShatter(caretPoint(el), what);
     });
   }
-  watch('txt', 'meme'); watch('txt2', 'meme'); watch('wallBody', 'wall'); watch('wallName', 'wall');
+  watch('txt', 'meme'); watch('txt2', 'meme'); watch('txt3', 'meme'); watch('wallBody', 'wall'); watch('wallName', 'wall');
 
   // get the screenshot helper ready once someone starts typing meme text
-  ['txt','txt2'].forEach(function(id){
+  ['txt','txt2','txt3'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.addEventListener('focus', function(){ window.megumiPreloadShatter(); }, { once:true });
   });

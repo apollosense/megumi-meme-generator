@@ -83,7 +83,24 @@
       text:{ mode:'plain', grow:'middle', size:3.9, lead:1.3, font:'manga',
              c1:'#000000', small:false, upper:true,
              slots:[ { x:.823, y:.217, w:.2, h:.16, sample:'A SOR-\nCERER...' },
-                     { x:.255, y:.738, w:.27, h:.2, sample:'...IS\nNOTHING\nBUT A CON\nARTIST.', hint:'Goes in the bottom bubble.' } ] } }
+                     { x:.255, y:.738, w:.27, h:.2, sample:'...IS\nNOTHING\nBUT A CON\nARTIST.', hint:'Goes in the bottom bubble.' } ] } },
+    // classic meme look: white impact style letters with a black outline
+    { id:'sukuna',        src:'templ/sukuna.jpg',        label:'Sukuna', tags:'sukuna ryomen king of curses jjk jujutsu kaisen caption stand proud',
+      text:{ mode:'outline', grow:'up', x:.5, y:.965, size:13, lead:1.2, font:'Anton',
+             c1:'#ffffff', c2:'#ffffff', small:false, upper:true, sample:'STAND PROUD' } },
+    // top caption is white on the black bar, the bubble is black text
+    { id:'gojo-nah-id-win', src:'templ/gojo-nah-id-win.png', label:'Nah, I\'d win', tags:'gojo nah id win would you lose jjk jujutsu kaisen manga speech bubble',
+      text:{ mode:'plain', grow:'middle', size:5.8, lead:1.25, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.51, y:.085, w:.9, h:.032, color:'#ffffff', sample:'"WOULD YOU LOSE?"' },
+                     { x:.827, y:.33, w:.2, h:.145, sample:'NAH,\nI\'D\nWIN.', hint:'Goes in the speech bubble.' } ] } },
+    // 3 bubbles: sukuna's two in dark pink, jogo's in green like the colored page
+    { id:'sukuna-stand-proud', src:'templ/sukuna-stand-proud.png', label:'Stand proud', tags:'sukuna jogo stand proud youre strong what is this jjk jujutsu kaisen manga colored speech bubble',
+      text:{ mode:'plain', grow:'middle', size:2.9, lead:1.3, font:'manga',
+             c1:'#7E1742', small:false, upper:true,
+             slots:[ { x:.229, y:.297, w:.14, h:.11, sample:'YOU\'RE\nSTRONG.', hint:'Goes in the big left bubble.' },
+                     { x:.875, y:.194, w:.11, h:.1, sample:'STAND\nPROUD.', hint:'Goes in the top right bubble.' },
+                     { x:.4, y:.731, w:.09, h:.1, color:'#2B6E58', sample:'WHAT...\nIS THIS?', hint:'Goes in the green bubble (bottom).' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -139,7 +156,7 @@
   }
 
   function lines(slot){
-    var t = $(slot ? 'txt2' : 'txt').value.replace(/\r/g,'');
+    var t = $(['txt','txt2','txt3'][slot] || 'txt').value.replace(/\r/g,'');
     if($('upper').checked) t = t.toUpperCase();
     var arr = t.split('\n');
     while(arr.length && arr[arr.length-1].trim()==='') arr.pop();
@@ -161,6 +178,9 @@
     var base = W * parseFloat($('size').value)/100;
     var glow = parseFloat($('glow').value)/100 * (glowScale==null ? 1 : glowScale);
     var c1 = $('c1').value, c2 = $('c2').value;
+    // a spot can have its own color (like white text on a black bar)
+    var own = ((currentTemplate.text || {}).slots || [])[slot];
+    if(own && own.color) c1 = own.color;
     var shrink = $('small').checked;
     var x = state.pos[slot].x*W, y = state.pos[slot].y*H;
     var fam = fontStack();
@@ -347,7 +367,7 @@
     $('c2Label').textContent = md==='outline' ? 'Highlight color' : 'Glow color';
   }
   $('mode').addEventListener('change', function(){ syncMode(); schedule(); });
-  ['txt','txt2','size','glow','small','upper','c1','c2'].forEach(function(id){
+  ['txt','txt2','txt3','size','glow','small','upper','c1','c2'].forEach(function(id){
     $(id).addEventListener('input', function(){ syncLabels(); schedule(); });
   });
   $('font').addEventListener('change', function(){
@@ -398,6 +418,10 @@
     $('txt2Wrap').hidden = !two;
     if(two) $('txt2Hint').textContent = (sl[1].hint || 'Goes in the second spot.') + ' One line per row.';
     if(two && ($('txt2').value.trim()==='' || !old[1] || same($('txt2').value, old[1].sample))) $('txt2').value = sl[1].sample;
+    var three = sl.length > 2;
+    $('txt3Wrap').hidden = !three;
+    if(three) $('txt3Hint').textContent = (sl[2].hint || 'Goes in the third spot.') + ' One line per row.';
+    if(three && ($('txt3').value.trim()==='' || !old[2] || same($('txt3').value, old[2].sample))) $('txt3').value = sl[2].sample;
     $('dragHint').textContent = two ? 'Drag each text on the image to reposition it.' : 'Drag the text on the image to reposition it.';
     syncLabels(); syncMode();
   }
