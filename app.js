@@ -100,7 +100,11 @@
              c1:'#7E1742', small:false, upper:true,
              slots:[ { x:.229, y:.297, w:.14, h:.11, sample:'YOU\'RE\nSTRONG.', hint:'Goes in the big left bubble.' },
                      { x:.875, y:.194, w:.11, h:.1, sample:'STAND\nPROUD.', hint:'Goes in the top right bubble.' },
-                     { x:.4, y:.731, w:.09, h:.1, color:'#2B6E58', sample:'WHAT...\nIS THIS?', hint:'Goes in the green bubble (bottom).' } ] } }
+                     { x:.4, y:.731, w:.09, h:.1, color:'#2B6E58', sample:'WHAT...\nIS THIS?', hint:'Goes in the green bubble (bottom).' } ] } },
+    { id:'higuruma-oh-my-god', src:'templ/higuruma-oh-my-god.png', label:'Higuruma oh my god', tags:'higuruma hiromi oh my god omg jjk jujutsu kaisen manga facepalm speech bubble',
+      text:{ mode:'plain', grow:'middle', size:6.4, lead:1.25, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.849, y:.25, w:.22, h:.18, sample:'OH\nMY\nGOD...', hint:'Goes in the speech bubble.' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
