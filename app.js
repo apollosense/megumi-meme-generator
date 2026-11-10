@@ -255,6 +255,11 @@
 
   // flat text for the manga pages. the size is worked out from the height of a
   // capital letter, so it comes out the same size whichever font ends up loading
+  // true when the first real letter is from a right-to-left script (arabic, hebrew...)
+  function isRtl(s){
+    var m = String(s).match(/[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]|[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/);
+    return !!(m && /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/.test(m[0]));
+  }
   function drawPlain(ctx, tc, slot, arr, base, x, y, fam, color, color2, outline){
     var t = currentTemplate.text || {};
     var wt = fontWeight();
@@ -320,8 +325,17 @@
         var w = ctx.measureText(s).width, lx = x - w/2, by = first + i*pitch;
         var cut = (i===arr.length-1 && words>1) ? s.replace(/\s+$/,'').lastIndexOf(' ') + 1 : s.length;
         var head = s.slice(0, cut), tail = s.slice(cut);
-        ctx.fillStyle = color; ctx.fillText(head, lx, by);
-        if(tail){ ctx.fillStyle = color2; ctx.fillText(tail, lx + ctx.measureText(head).width, by); }
+        // draw the whole line at once (so arabic/hebrew letters stay joined and in
+        // the right order), then paint over the last word where it really shows up:
+        // on the right for left-to-right text, on the left for right-to-left text
+        ctx.fillStyle = color; ctx.fillText(s, lx, by);
+        if(tail){
+          var tw = ctx.measureText(tail).width, rtl = isRtl(s);
+          var cx0 = rtl ? lx : lx + w - tw;
+          ctx.save(); ctx.beginPath(); ctx.rect(cx0 - 1, by - cap*2, tw + 2, cap*3); ctx.clip();
+          ctx.fillStyle = color2; ctx.fillText(s, lx, by);
+          ctx.restore();
+        }
       });
     } else
     arr.forEach(function(s, i){
