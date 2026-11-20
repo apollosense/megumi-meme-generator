@@ -219,7 +219,7 @@
     items.forEach(function(it){
       ctx.font = wt + it.sz + 'px ' + fam;
       var m = ctx.measureText(it.t);
-      var lx = it.small ? x + bigW*0.13 : x;
+      var lx = x;
       var top = it.y - it.sz*capR;
       var g = ctx.createLinearGradient(0, top, 0, it.y);
       if(it.small){
