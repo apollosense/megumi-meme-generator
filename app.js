@@ -104,7 +104,15 @@
     { id:'higuruma-oh-my-god', src:'templ/higuruma-oh-my-god.png', label:'Higuruma oh my god', tags:'higuruma hiromi oh my god omg jjk jujutsu kaisen manga facepalm speech bubble',
       text:{ mode:'plain', grow:'middle', size:6.4, lead:1.25, font:'manga',
              c1:'#000000', small:false, upper:true,
-             slots:[ { x:.849, y:.25, w:.22, h:.18, sample:'OH\nMY\nGOD...', hint:'Goes in the speech bubble.' } ] } }
+             slots:[ { x:.849, y:.25, w:.22, h:.18, sample:'OH\nMY\nGOD...', hint:'Goes in the speech bubble.' } ] } },
+    { id:'gojo-nah-id-gift', src:'templ/gojo-nah-id-gift.jpg', label:'Nah, I\'d gift', tags:'christmas xmas noel santa gojo nah id win gift jjk jujutsu kaisen manga speech bubble tree candy cane',
+      text:{ mode:'plain', grow:'middle', size:6, lead:1.25, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.818, y:.17, w:.17, h:.17, sample:'NAH,\nI\'D\nGIFT.', hint:'Goes in the speech bubble.' } ] } },
+    { id:'gojo-infinite-jolly', src:'templ/gojo-infinite-jolly.jpg', label:'Infinite Jolly', tags:'christmas xmas noel santa gojo domain expansion infinite void jolly jjk jujutsu kaisen merry christmas snowman reindeer speech bubble',
+      text:{ mode:'plain', grow:'middle', size:5, lead:1.25, font:'manga',
+             c1:'#000000', small:false, upper:true,
+             slots:[ { x:.82, y:.395, w:.2, h:.3, sample:'DOMAIN\nEXPANSION:\nINFINITE JOLLY', hint:'Goes in the speech bubble.' } ] } }
   ];
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
@@ -172,6 +180,7 @@
     var W = tc.width, H = tc.height;
     ctx.clearRect(0,0,W,H);
     if(state.bg) ctx.drawImage(state.bg,0,0,W,H);
+    if(state.bg && !state.custom) drawHats(ctx, W, H);
     for(var s=0; s<state.pos.length; s++) drawSlot(ctx, tc, s, glowScale);
   }
 
@@ -408,8 +417,44 @@
   });
 
   // ---- template + background handling -----------------------------------
-  function setBg(im){
-    state.bg = im;
+  // christmas: santa hats on everyone from dec 1 to jan 6 (or add ?christmas to the link)
+  // [x, y, size, tilt, clip] x/y = middle of the fur band, size = band width, all as part of the picture
+  // clip = [x0,y0,x1,y1] keeps the hat inside one panel
+  var XMAS = (function(){ var d = new Date(), m = d.getMonth(), day = d.getDate();
+    return m === 11 || (m === 0 && day <= 6) || /[?&]christmas\b/.test(location.search); })();
+  var HATS = {
+    'megumi-text':        [[.75, .09, .42, 8]],
+    'geto-monkeys':       [[.31, .34, .52, -14]],
+    'yuji-uncanny':       [[.27, .27, .38, -10, [.05,.15,.5,1]], [.71, .25, .4, 4, [.5,.15,.95,1]]],
+    'yuji-yeah':          [[.8, .2, .3, 2]],
+    'gojo-shush':         [[.8, .06, .5, 10]],
+    'maki-naoya':         [[.53, .06, .44, 0, [0,0,1,.405]], [.53, .53, .45, 0, [0,.44,1,1]]],
+    'reggie-con-artist':  [[.555, .1, .2, 8]],
+    'sukuna':             [[.62, .1, .78, 10]],
+    'gojo-nah-id-win':    [[.31, .35, .62, -14, [0,.155,1,1]]],
+    'sukuna-stand-proud': [[.645, .1, .22, 2, [0,0,1,.6]]]
+  };
+
+  var hatImg = null;
+  if(XMAS){ hatImg = new Image(); hatImg.onload = function(){ schedule(); }; hatImg.src = 'templ/santa-hat.png'; }
+  // the hat picture: fur band middle at (190,190), tilted 33deg, 285px long
+  function drawHats(ctx, W, H){
+    if(!XMAS || !hatImg || !hatImg.complete || !hatImg.naturalWidth || !currentTemplate) return;
+    var list = HATS[currentTemplate.id]; if(!list) return;
+    var k = hatImg.naturalWidth/360;
+    list.forEach(function(h){
+      var s = h[2]*W/285;
+      ctx.save();
+      if(h[4]){ ctx.beginPath(); ctx.rect(h[4][0]*W, h[4][1]*H, (h[4][2]-h[4][0])*W, (h[4][3]-h[4][1])*H); ctx.clip(); }
+      ctx.translate(h[0]*W, h[1]*H);
+      ctx.rotate((33 + h[3])*Math.PI/180);
+      ctx.drawImage(hatImg, -190*s, -190*s, 360*s, 360*s);
+      ctx.restore();
+    });
+  }
+
+  function setBg(im, custom){
+    state.bg = im; state.custom = !!custom;
     var maxW = 2048, s = Math.min(1, maxW/im.naturalWidth);
     cv.width = Math.round(im.naturalWidth*s); cv.height = Math.round(im.naturalHeight*s);
     schedule();
@@ -511,7 +556,7 @@
   $('bgFile').addEventListener('change', function(){
     var f = this.files[0]; if(!f) return;
     var url = URL.createObjectURL(f);
-    loadImage(url).then(function(im){ setBg(im); say(''); }).catch(function(){ say('That image could not be opened.'); });
+    loadImage(url).then(function(im){ setBg(im, true); say(''); }).catch(function(){ say('That image could not be opened.'); });
   });
   $('bgReset').addEventListener('click', function(){
     $('bgFile').value='';
