@@ -22,6 +22,9 @@
   //         'down' = y is the first line and more lines go under it,
   //         'middle' = the whole block is centered on y
   //   lead  plain mode only. line spacing, in capital letter heights
+  // christmas stuff shows from dec 23 to jan 6 (or add ?christmas to the link)
+  var XMAS = (function(){ var d = new Date(), m = d.getMonth(), day = d.getDate();
+    return (m === 11 && day >= 23) || (m === 0 && day <= 6) || /[?&]christmas\b/.test(location.search); })();
   var TEMPLATES = [
     // size and spot measured from the original "did you say potential" meme,
     // lined up with this picture using his eyes
@@ -105,15 +108,15 @@
       text:{ mode:'plain', grow:'middle', size:6.4, lead:1.25, font:'manga',
              c1:'#000000', small:false, upper:true,
              slots:[ { x:.849, y:.25, w:.22, h:.18, sample:'OH\nMY\nGOD...', hint:'Goes in the speech bubble.' } ] } },
-    { id:'gojo-nah-id-gift', src:'templ/gojo-nah-id-gift.jpg', label:'Nah, I\'d gift', tags:'christmas xmas noel santa gojo nah id win gift jjk jujutsu kaisen manga speech bubble tree candy cane',
+    { id:'gojo-nah-id-gift', xmas:true, src:'templ/gojo-nah-id-gift.jpg', label:'Nah, I\'d gift', tags:'christmas xmas noel santa gojo nah id win gift jjk jujutsu kaisen manga speech bubble tree candy cane',
       text:{ mode:'plain', grow:'middle', size:6, lead:1.25, font:'manga',
              c1:'#000000', small:false, upper:true,
              slots:[ { x:.818, y:.17, w:.17, h:.17, sample:'NAH,\nI\'D\nGIFT.', hint:'Goes in the speech bubble.' } ] } },
-    { id:'gojo-infinite-jolly', src:'templ/gojo-infinite-jolly.jpg', label:'Infinite Jolly', tags:'christmas xmas noel santa gojo domain expansion infinite void jolly jjk jujutsu kaisen merry christmas snowman reindeer speech bubble',
+    { id:'gojo-infinite-jolly', xmas:true, src:'templ/gojo-infinite-jolly.jpg', label:'Infinite Jolly', tags:'christmas xmas noel santa gojo domain expansion infinite void jolly jjk jujutsu kaisen merry christmas snowman reindeer speech bubble',
       text:{ mode:'plain', grow:'middle', size:5, lead:1.25, font:'manga',
              c1:'#000000', small:false, upper:true,
              slots:[ { x:.82, y:.395, w:.2, h:.3, sample:'DOMAIN\nEXPANSION:\nINFINITE JOLLY', hint:'Goes in the speech bubble.' } ] } }
-  ];
+  ].filter(function(t){ return !t.xmas || XMAS; });
   function slotsOf(tpl){
     var t = (tpl && tpl.text) || {};
     return t.slots || [{ x:t.x==null ? .045 : t.x, y:t.y==null ? .9 : t.y, sample:t.sample }];
@@ -417,11 +420,9 @@
   });
 
   // ---- template + background handling -----------------------------------
-  // christmas: santa hats on everyone from dec 1 to jan 6 (or add ?christmas to the link)
+  // christmas: santa hats on everyone from dec 23 to jan 6 (or add ?christmas to the link)
   // [x, y, size, tilt, clip] x/y = middle of the fur band, size = band width, all as part of the picture
   // clip = [x0,y0,x1,y1] keeps the hat inside one panel
-  var XMAS = (function(){ var d = new Date(), m = d.getMonth(), day = d.getDate();
-    return m === 11 || (m === 0 && day <= 6) || /[?&]christmas\b/.test(location.search); })();
   var HATS = {
     'megumi-text':        [[.75, .09, .42, 8]],
     'geto-monkeys':       [[.31, .34, .52, -14]],
