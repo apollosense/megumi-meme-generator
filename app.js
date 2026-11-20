@@ -77,7 +77,7 @@
     // measured from the real card (1920x1080): title spans 82% of the width, tops
     // flat at 22.5%, bottoms bend up 10% in the middle, yellow #FAED09 on #189EF2.
     // the credits are a small caps line then bigger lines, in a futura look-alike
-    { id:'invincible',    src:'templ/invincible-title.jpg', label:'Invincible title card', tags:'invincible title card mark grayson omni man amazon blue yellow show intro',
+    { id:'invincible',    src:'templ/invincible-title.jpg', label:'Invincible ↗', tags:'invincible title card mark grayson omni man amazon blue yellow show intro',
       text:{ mode:'title', size:22, font:'titlecard', c1:'#FAED09', c2:'#189EF2', upper:false,
              slots:[ { x:.5, y:.225, sample:'THINK MARK!' },
                      { x:.5, y:.731, sample:'BASED ON THE COMIC BOOK BY\nRobert Kirkman, Cory Walker, & Ryan Ottley',
@@ -536,7 +536,11 @@
       var im = document.createElement('img'); im.alt = tpl.label; im.loading = 'lazy'; im.src = tpl.src;
       var sp = document.createElement('span'); sp.textContent = tpl.label;
       b.appendChild(im); b.appendChild(sp);
-      b.addEventListener('click', function(){ loadTemplate(tpl); });
+      b.addEventListener('click', function(){
+        // the invincible one goes to the real title card maker
+        if(tpl.id === 'invincible'){ window.open('https://apollosense.github.io/INVINCIBLER/', '_blank', 'noopener'); return; }
+        loadTemplate(tpl);
+      });
       grid.appendChild(b);
     });
     $('templEmpty').hidden = list.length > 0;
